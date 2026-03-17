@@ -14,11 +14,16 @@ const mimeTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml; charset=utf-8',
 };
 
 function resolveRequestPath(urlPath: string): string {
   if (urlPath === '/' || urlPath === '/index.html') {
     return path.join(dashboardRoot, 'index.html');
+  }
+
+  if (urlPath === '/demo' || urlPath === '/demo.html') {
+    return path.join(dashboardRoot, 'demo.html');
   }
 
   if (urlPath === '/styles.css' || urlPath === '/app.js') {

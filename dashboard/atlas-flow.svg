@@ -1,0 +1,28 @@
+<svg width="920" height="420" viewBox="0 0 920 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="920" height="420" rx="24" fill="#F8FBFD"/>
+  <rect x="34" y="110" width="226" height="190" rx="18" fill="white" stroke="#D7E1E9"/>
+  <rect x="346" y="110" width="226" height="190" rx="18" fill="white" stroke="#D7E1E9"/>
+  <rect x="658" y="110" width="228" height="190" rx="18" fill="white" stroke="#D7E1E9"/>
+  <path d="M260 204H346" stroke="#9CB2C3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M572 204H658" stroke="#9CB2C3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M322 192L346 204L322 216" stroke="#9CB2C3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M634 192L658 204L634 216" stroke="#9CB2C3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="64" y="144" width="104" height="14" rx="7" fill="#0B4A6F"/>
+  <rect x="64" y="176" width="160" height="12" rx="6" fill="#DCE6EE"/>
+  <rect x="64" y="204" width="144" height="12" rx="6" fill="#DCE6EE"/>
+  <rect x="64" y="232" width="124" height="12" rx="6" fill="#DCE6EE"/>
+  <circle cx="418" cy="178" r="14" fill="#0B4A6F"/>
+  <circle cx="470" cy="220" r="14" fill="#B18B52"/>
+  <circle cx="516" cy="176" r="14" fill="#0B4A6F"/>
+  <line x1="418" y1="178" x2="470" y2="220" stroke="#9CB2C3" stroke-width="4"/>
+  <line x1="470" y1="220" x2="516" y2="176" stroke="#9CB2C3" stroke-width="4"/>
+  <rect x="702" y="150" width="140" height="16" rx="8" fill="#0B4A6F"/>
+  <rect x="702" y="186" width="108" height="16" rx="8" fill="#B18B52"/>
+  <rect x="702" y="222" width="164" height="16" rx="8" fill="#DCE6EE"/>
+  <text x="63" y="92" fill="#5E697B" font-family="Helvetica Neue, Arial, sans-serif" font-size="22" letter-spacing="2">INPUT</text>
+  <text x="370" y="92" fill="#5E697B" font-family="Helvetica Neue, Arial, sans-serif" font-size="22" letter-spacing="2">SCORING</text>
+  <text x="688" y="92" fill="#5E697B" font-family="Helvetica Neue, Arial, sans-serif" font-size="22" letter-spacing="2">OUTPUT</text>
+  <text x="64" y="330" fill="#0F172A" font-family="Helvetica Neue, Arial, sans-serif" font-size="22">Creator data + brand brief</text>
+  <text x="364" y="330" fill="#0F172A" font-family="Helvetica Neue, Arial, sans-serif" font-size="22">Hybrid fit + quality model</text>
+  <text x="702" y="330" fill="#0F172A" font-family="Helvetica Neue, Arial, sans-serif" font-size="22">Readable shortlist</text>
+</svg>

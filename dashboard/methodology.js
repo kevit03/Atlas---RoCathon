@@ -11,9 +11,42 @@ function renderCards(targetId, items) {
       <span class="check-status">${item.status}</span>
       <strong>${item.title}</strong>
       <p class="detail-copy">${item.copy}</p>
+      ${
+        item.details
+          ? `<details class="expand-detail">
+              <summary>Longer explanation</summary>
+              <p class="detail-copy">${item.details}</p>
+            </details>`
+          : ""
+      }
     `;
     container.appendChild(card);
   });
+}
+
+function renderHeroMetrics(data) {
+  const container = document.getElementById("heroMetrics");
+  container.innerHTML = `
+    <span class="panel-label">At a glance</span>
+    <div class="hero-metric-list">
+      <div class="hero-metric">
+        <strong>${data.creators.length}</strong>
+        <span class="detail-copy">Creators screened across the full market universe.</span>
+      </div>
+      <div class="hero-metric">
+        <strong>4</strong>
+        <span class="detail-copy">Primary Atlas components: fit, query, audience, and commercial quality.</span>
+      </div>
+      <div class="hero-metric">
+        <strong>2</strong>
+        <span class="detail-copy">Referenced retrieval papers supporting the fusion approach.</span>
+      </div>
+      <div class="hero-metric">
+        <strong>1</strong>
+        <span class="detail-copy">Official challenge ranker preserved separately from the dashboard screen.</span>
+      </div>
+    </div>
+  `;
 }
 
 async function init() {
@@ -24,6 +57,38 @@ async function init() {
     }
 
     const data = await response.json();
+    renderHeroMetrics(data);
+
+    renderCards("rationaleGrid", [
+      {
+        status: "Official",
+        title: "Convex fusion",
+        copy: "The official ranker blends normalized semantic fit with normalized projected value.",
+        details:
+          "This keeps both components on the same scale while preserving score magnitude. Because projected_score already contains business signal, a linear blend is more useful here than a rank-only fusion rule.",
+      },
+      {
+        status: "Priority",
+        title: "Largest weight: fit",
+        copy: "Profile fit gets the largest weight so off-brief creators do not rise on scale alone.",
+        details:
+          "Atlas is a screening layer, so it needs to protect contextual fit first. High reach or GMV can be attractive, but if the creator misses the category the shortlist becomes harder to defend.",
+      },
+      {
+        status: "Balance",
+        title: "Query stays second",
+        copy: "Query overlap matters, but it sits below durable profile fit.",
+        details:
+          "Campaign wording should influence the screen, but short prompt phrasing should not overpower the broader brand category. That is why query overlap remains below industry fit in Atlas.",
+      },
+      {
+        status: "Commercial",
+        title: "Nested commercial block",
+        copy: "Commercial quality is capped, then divided across projected score, engagement, and GMV.",
+        details:
+          "Projected score leads the block because it is already a forward-looking business indicator from RoC. Engagement adds creator quality and GMV adds evidence of conversion, but neither is allowed to dominate the screen.",
+      },
+    ]);
 
     renderCards("diagnosticGrid", [
       {
@@ -48,38 +113,30 @@ async function init() {
       },
     ]);
 
-    renderCards("requirementGrid", [
+    renderCards("referenceGrid", [
       {
-        status: "Complete",
-        title: "Vector DB setup",
-        copy: "Postgres + pgvector schema and retrieval support are implemented in the repo.",
+        status: "Paper",
+        title: "Bruch et al. (2022)",
+        copy: "Supports convex combination for hybrid retrieval when scores are normalized.",
+        details:
+          "The paper 'An Analysis of Fusion Functions for Hybrid Retrieval' motivates the family of score fusion methods used by the official challenge ranker.",
       },
       {
-        status: "Complete",
-        title: "Ingestion script",
-        copy: "The ingestion path embeds and stores creators for the production-grade workflow.",
+        status: "Paper",
+        title: "Cormack et al. (2009)",
+        copy: "Defines Reciprocal Rank Fusion, the classic rank-only baseline.",
+        details:
+          "Atlas references RRF as the comparison point, but does not use it in the final challenge ranker because rank-only fusion would throw away the magnitude of projected_score.",
       },
       {
-        status: "Complete",
-        title: "searchCreators",
-        copy: "The challenge search function is implemented with a hybrid scoring formula.",
-      },
-      {
-        status: "Complete",
-        title: "Hybrid scoring formula",
-        copy: "The official challenge formula is documented and preserved alongside the dashboard exploration model.",
-      },
-      {
-        status: "Complete",
-        title: "Output JSON",
-        copy: "The required top-10 output file is generated for the brand_smart_home scenario.",
-      },
-      {
-        status: "Pending",
-        title: "2-minute Loom walkthrough",
-        copy: "The repository cannot generate the Loom deliverable automatically.",
+        status: "Design",
+        title: "Scaled heavy-tail metrics",
+        copy: "Large creator metrics are normalized before entering the score.",
+        details:
+          "Follower count, GMV, and views are all heavy-tailed. Log scaling stops a few very large creators from flattening the rest of the market and makes the screen more stable for review.",
       },
     ]);
+
   } catch (error) {
     document.body.innerHTML = `
       <main class="app-shell">

@@ -39,6 +39,8 @@ const state = {
   quizStarted: false,
   quizStep: 0,
   quizAnswers: {},
+  chartDetail: 60,
+  expandedChart: null,
 };
 
 let dashboardData = null;
@@ -110,6 +112,29 @@ function formatPercent(value) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
+function humanizeUsername(username) {
+  return username
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+    .join(" ");
+}
+
+function truncateText(text, maxLength = 80) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function creatorDisplayName(creator) {
+  return humanizeUsername(creator.username);
+}
+
+function shortCreatorLabel(creator, maxLength = 18) {
+  return truncateText(creatorDisplayName(creator), maxLength);
+}
+
 function average(items, mapper) {
   if (items.length === 0) {
     return 0;
@@ -123,6 +148,35 @@ function percentile(sortedValues, pct) {
   }
   const index = Math.floor(clamp(pct, 0, 1) * (sortedValues.length - 1));
   return sortedValues[index];
+}
+
+function bucketValues(values, bucketCount) {
+  if (values.length <= bucketCount) {
+    return values;
+  }
+
+  const bucketSize = values.length / bucketCount;
+  const buckets = [];
+
+  for (let index = 0; index < bucketCount; index += 1) {
+    const start = Math.floor(index * bucketSize);
+    const end = Math.floor((index + 1) * bucketSize);
+    const slice = values.slice(start, Math.max(end, start + 1));
+    const avg = slice.reduce((sum, value) => sum + value, 0) / slice.length;
+    buckets.push(avg);
+  }
+
+  return buckets;
+}
+
+function chartDetailRatio() {
+  return clamp(state.chartDetail / 120, 0.24, 1);
+}
+
+function chartWindowCreators(creators) {
+  const keepRatio = chartDetailRatio();
+  const keepCount = Math.max(12, Math.round(creators.length * keepRatio));
+  return creators.slice(0, keepCount);
 }
 
 function getProfileDetail(id) {
@@ -301,18 +355,20 @@ function renderSelectedCreator(view) {
   }
 
   target.innerHTML = `
-    <strong style="display:block;font-size:1.05rem;overflow-wrap:anywhere;">${creator.username}</strong>
-    <p class="detail-copy" style="margin:8px 0 12px;">Atlas Score ${creator.atlasScore.toFixed(2)}</p>
+    <strong class="selected-name">${creatorDisplayName(creator)}</strong>
+    <span class="selected-handle">@${creator.username}</span>
+    <p class="detail-copy selected-bio">${truncateText(creator.bio, 156)}</p>
+    <p class="detail-copy" style="margin:0 0 12px;">Atlas Score ${creator.atlasScore.toFixed(2)}</p>
     <div class="industry-badges">
       ${creator.content_style_tags.map((tag) => `<span class="industry-badge">${tag}</span>`).join("")}
     </div>
   `;
 
   const items = [
-    { label: "Profile fit", value: creator.diagnostics.industryFit },
-    { label: "Query overlap", value: creator.diagnostics.queryOverlap },
-    { label: "Audience fit", value: creator.diagnostics.audienceFit },
-    { label: "Commercial", value: creator.diagnostics.commercialIndex },
+    { label: "Profile fit (38%)", value: creator.diagnostics.industryFit },
+    { label: "Query overlap (27%)", value: creator.diagnostics.queryOverlap },
+    { label: "Audience fit (15%)", value: creator.diagnostics.audienceFit },
+    { label: "Commercial quality (20%)", value: creator.diagnostics.commercialIndex },
   ];
 
   breakdown.innerHTML = items
@@ -344,7 +400,12 @@ function renderKpis(view) {
   const avgEngagement = average(view.universe.all, (creator) => creator.metrics.engagement_rate);
 
   const cards = [
-    { label: "Top candidate", value: topCreator?.username ?? "None", copy: topCreator ? `${topCreator.atlasScore.toFixed(2)} atlas score` : "No results" },
+    {
+      label: "Top candidate",
+      value: topCreator ? creatorDisplayName(topCreator) : "None",
+      valueClass: topCreator ? "kpi-name" : "",
+      copy: topCreator ? `@${topCreator.username} · ${topCreator.atlasScore.toFixed(2)} atlas score` : "No results",
+    },
     { label: "P90 threshold", value: p90.toFixed(2), copy: "Top-decile cutoff" },
     { label: "Top 10 GMV", value: formatCurrency(totalTopTenGmv), copy: "Combined shortlist commerce" },
     { label: "Avg projected", value: avgProjected.toFixed(2), copy: "Universe projected score" },
@@ -356,42 +417,59 @@ function renderKpis(view) {
     article.className = "kpi-card";
     article.innerHTML = `
       <div class="kpi-label">${card.label}</div>
-      <div class="kpi-value">${card.value}</div>
+      <div class="kpi-value ${card.valueClass ?? ""}">${card.value}</div>
       <div class="detail-copy">${card.copy}</div>
     `;
     container.appendChild(article);
   });
 }
 
-function renderScoreDistribution(view) {
-  const container = document.getElementById("scoreDistribution");
+function scoreDistributionMarkup(view, expanded = false) {
   const values = view.universe.all.map((creator) => creator.atlasScore);
 
   if (values.length === 0) {
-    container.innerHTML = "<p class='detail-copy'>No data available.</p>";
-    return;
+    return "<p class='detail-copy'>No data available.</p>";
   }
 
-  const width = 700;
-  const height = 240;
-  const margin = { top: 18, right: 18, bottom: 28, left: 42 };
+  const width = expanded ? 1040 : 700;
+  const height = expanded ? 540 : 240;
+  const margin = expanded
+    ? { top: 26, right: 28, bottom: 42, left: 54 }
+    : { top: 18, right: 18, bottom: 28, left: 42 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
   const sorted = [...values].sort((a, b) => b - a);
-  const minValue = Math.min(...sorted);
-  const maxValue = Math.max(...sorted);
+  const reduced = bucketValues(sorted, state.curveBins);
+  const minValue = Math.min(...reduced);
+  const maxValue = Math.max(...reduced);
   const paddedMin = Math.max(0, minValue - 4);
   const paddedMax = Math.min(100, maxValue + 4);
   const yScale = (value) =>
     margin.top + innerHeight - ((value - paddedMin) / Math.max(paddedMax - paddedMin, 1)) * innerHeight;
   const xScale = (index) =>
-    margin.left + (index / Math.max(sorted.length - 1, 1)) * innerWidth;
+    margin.left + (index / Math.max(reduced.length - 1, 1)) * innerWidth;
 
-  const points = sorted.map((value, index) => `${xScale(index)},${yScale(value)}`).join(" ");
+  const points = reduced.map((value, index) => `${xScale(index)},${yScale(value)}`).join(" ");
+  const areaPoints = `${margin.left},${margin.top + innerHeight} ${points} ${width - margin.right},${margin.top + innerHeight}`;
   const ticks = [paddedMin, (paddedMin + paddedMax) / 2, paddedMax];
+  const markers = [
+    { label: "Top", value: reduced[0], index: 0, dx: expanded ? 12 : 0 },
+    {
+      label: "P90",
+      value: percentile([...sorted].sort((a, b) => b - a), 0.1),
+      index: Math.floor((reduced.length - 1) * 0.1),
+      dx: expanded ? 12 : 8,
+    },
+    {
+      label: "Median",
+      value: percentile([...sorted].sort((a, b) => b - a), 0.5),
+      index: Math.floor((reduced.length - 1) * 0.5),
+      dx: expanded ? 12 : 8,
+    },
+  ];
 
-  container.innerHTML = `
-    <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Universe score curve">
+  return `
+    <svg class="chart-svg ${expanded ? "expanded" : ""}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Universe score curve">
       <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
       ${ticks
@@ -402,25 +480,43 @@ function renderScoreDistribution(view) {
           `
         )
         .join("")}
-      <polyline fill="none" stroke="#0f2f7a" stroke-width="2.5" points="${points}"></polyline>
+      <polygon fill="#edf5f8" points="${areaPoints}"></polygon>
+      <polyline fill="none" stroke="#0b4a6f" stroke-width="2.5" points="${points}"></polyline>
+      ${markers
+        .map((marker) => {
+          const x = xScale(marker.index);
+          const y = yScale(marker.value);
+          return `
+            <circle cx="${x}" cy="${y}" r="3.2" fill="#0b4a6f"></circle>
+            <text class="chart-label" x="${Math.min(x + marker.dx, width - 54)}" y="${Math.max(y - 10, 14)}">${marker.label}</text>
+            <text class="chart-value" x="${Math.min(x + marker.dx, width - 44)}" y="${Math.max(y - 22, 14)}">${marker.value.toFixed(1)}</text>
+          `;
+        })
+        .join("")}
       <text class="chart-label" x="${margin.left}" y="${height - 6}">Highest ranked</text>
       <text class="chart-label" x="${width - margin.right - 68}" y="${height - 6}">Long tail</text>
     </svg>
+    <div class="chart-note">Resolution: ${state.curveBins} buckets. Drag the slider to compress or expand the score curve.</div>
   `;
 }
 
-function renderScatterPlot(view) {
-  const container = document.getElementById("scatterPlot");
-  const creators = view.universe.all;
+function renderScoreDistribution(view) {
+  const container = document.getElementById("scoreDistribution");
+  container.innerHTML = scoreDistributionMarkup(view, false);
+}
+
+function scatterPlotMarkup(view, expanded = false) {
+  const creators = scatterWindowCreators(view.universe.all);
 
   if (creators.length === 0) {
-    container.innerHTML = "<p class='detail-copy'>No data available.</p>";
-    return;
+    return "<p class='detail-copy'>No data available.</p>";
   }
 
-  const width = 700;
-  const height = 240;
-  const margin = { top: 16, right: 20, bottom: 30, left: 44 };
+  const width = expanded ? 1040 : 700;
+  const height = expanded ? 540 : 240;
+  const margin = expanded
+    ? { top: 22, right: 26, bottom: 40, left: 56 }
+    : { top: 16, right: 20, bottom: 30, left: 44 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
   const maxFollowers = Math.max(...creators.map((creator) => creator.metrics.follower_count), 1);
@@ -438,7 +534,7 @@ function renderScatterPlot(view) {
   const circles = creators
     .map((creator) => {
       const isSelected = creator.username === state.selectedCreatorUsername;
-      const fill = isSelected ? "#0f2f7a" : "#98a2b3";
+      const fill = isSelected ? "#0b4a6f" : "#9aa7b8";
       const radius = isSelected ? 5.5 : 3.2;
       return `<circle cx="${xScale(creator.metrics.follower_count)}" cy="${yScale(creator.metrics.total_gmv_30d)}" r="${radius}" fill="${fill}" fill-opacity="${isSelected ? 1 : 0.7}"></circle>`;
     })
@@ -449,20 +545,28 @@ function renderScatterPlot(view) {
     .map((creator) => {
       const x = xScale(creator.metrics.follower_count);
       const y = yScale(creator.metrics.total_gmv_30d);
-      return `<text class="chart-label" x="${Math.min(x + 8, width - 120)}" y="${Math.max(y - 8, 16)}">${creator.username}</text>`;
+      return `<text class="chart-label" x="${Math.min(x + 8, width - 130)}" y="${Math.max(y - 8, 16)}">${shortCreatorLabel(creator, expanded ? 22 : 16)}</text>`;
     })
     .join("");
 
-  container.innerHTML = `
-    <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Reach versus GMV">
+  return `
+    <svg class="chart-svg ${expanded ? "expanded" : ""}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Reach versus GMV">
       <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
+      <line x1="${margin.left + innerWidth / 2}" y1="${margin.top}" x2="${margin.left + innerWidth / 2}" y2="${margin.top + innerHeight}" stroke="#eef2f6"></line>
+      <line x1="${margin.left}" y1="${margin.top + innerHeight / 2}" x2="${width - margin.right}" y2="${margin.top + innerHeight / 2}" stroke="#eef2f6"></line>
       <text class="chart-label" x="${width - 120}" y="${height - 6}">Higher reach</text>
       <text class="chart-label" x="14" y="24" transform="rotate(-90 14,24)">Higher GMV</text>
       ${circles}
       ${labels}
     </svg>
+    <div class="chart-note">Zoom: ${state.scatterZoom}%. Move the slider right to inspect the top of the ranked universe more closely.</div>
   `;
+}
+
+function renderScatterPlot(view) {
+  const container = document.getElementById("scatterPlot");
+  container.innerHTML = scatterPlotMarkup(view, false);
 }
 
 function renderIndustryMix(view) {
@@ -491,6 +595,106 @@ function renderIndustryMix(view) {
     });
 }
 
+function renderEfficiencyPlot(view) {
+  const container = document.getElementById("efficiencyPlot");
+  if (!container) {
+    return;
+  }
+
+  const creators = view.universe.all;
+
+  if (creators.length === 0) {
+    container.innerHTML = "<p class='detail-copy'>No data available.</p>";
+    return;
+  }
+
+  const width = 700;
+  const height = 240;
+  const margin = { top: 18, right: 18, bottom: 30, left: 42 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+  const maxEngagement = Math.max(...creators.map((creator) => creator.metrics.engagement_rate), 0.001);
+  const labels = new Set(view.universe.top.slice(0, 2).map((creator) => creator.username));
+  if (view.universe.selected) {
+    labels.add(view.universe.selected.username);
+  }
+
+  const xScale = (value) => margin.left + clamp((value - 60) / 40) * innerWidth;
+  const yScale = (value) => margin.top + innerHeight - clamp(value / maxEngagement) * innerHeight;
+
+  const points = creators
+    .map((creator) => {
+      const isSelected = creator.username === state.selectedCreatorUsername;
+      return `<circle cx="${xScale(creator.projected_score)}" cy="${yScale(creator.metrics.engagement_rate)}" r="${isSelected ? 5.2 : 3.2}" fill="${isSelected ? "#0b4a6f" : "#9aa7b8"}" fill-opacity="${isSelected ? 1 : 0.72}"></circle>`;
+    })
+    .join("");
+
+  const annotations = creators
+    .filter((creator) => labels.has(creator.username))
+    .map((creator) => {
+      const x = xScale(creator.projected_score);
+      const y = yScale(creator.metrics.engagement_rate);
+      return `<text class="chart-label" x="${Math.min(x + 8, width - 126)}" y="${Math.max(y - 10, 16)}">${shortCreatorLabel(creator, 16)}</text>`;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Projected score versus engagement">
+      <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
+      <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
+      <line x1="${margin.left + innerWidth / 2}" y1="${margin.top}" x2="${margin.left + innerWidth / 2}" y2="${margin.top + innerHeight}" stroke="#eef2f6"></line>
+      <line x1="${margin.left}" y1="${margin.top + innerHeight / 2}" x2="${width - margin.right}" y2="${margin.top + innerHeight / 2}" stroke="#eef2f6"></line>
+      <text class="chart-label" x="${width - 140}" y="${height - 6}">Higher projected</text>
+      <text class="chart-label" x="14" y="24" transform="rotate(-90 14,24)">Higher engagement</text>
+      ${points}
+      ${annotations}
+    </svg>
+    <div class="chart-note">Projected score on the x-axis, engagement on the y-axis. This highlights creators who are strong on both quality and commercial expectation.</div>
+  `;
+}
+
+function renderAudienceFitChart(view) {
+  const container = document.getElementById("audienceFitChart");
+  if (!container) {
+    return;
+  }
+
+  const creators = [...view.universe.top]
+    .sort((left, right) => right.diagnostics.audienceFit - left.diagnostics.audienceFit)
+    .slice(0, 8);
+
+  if (creators.length === 0) {
+    container.innerHTML = "<p class='detail-copy'>No data available.</p>";
+    return;
+  }
+
+  const width = 700;
+  const rowHeight = 26;
+  const height = creators.length * rowHeight + 52;
+  const margin = { top: 14, right: 28, bottom: 18, left: 170 };
+  const innerWidth = width - margin.left - margin.right;
+
+  const bars = creators
+    .map((creator, index) => {
+      const y = margin.top + index * rowHeight;
+      const barWidth = creator.diagnostics.audienceFit * innerWidth;
+      return `
+        <text class="chart-label" x="0" y="${y + 14}">${shortCreatorLabel(creator, 18)}</text>
+        <rect x="${margin.left}" y="${y}" width="${innerWidth}" height="14" fill="#edf1f5"></rect>
+        <rect x="${margin.left}" y="${y}" width="${barWidth}" height="14" fill="#0b4a6f"></rect>
+        <text class="chart-value" x="${margin.left + Math.min(barWidth + 10, innerWidth - 8)}" y="${y + 11}">${(creator.diagnostics.audienceFit * 100).toFixed(0)}</text>
+      `;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Top audience fit">
+      ${bars}
+    </svg>
+    <div class="chart-note">Highest audience-fit creators in the active shortlist. This is useful when the brand demographic is narrow or highly intentional.</div>
+  `;
+}
+
 function renderSummaryRail(view) {
   const container = document.getElementById("summaryRail");
   container.innerHTML = "";
@@ -501,9 +705,18 @@ function renderSummaryRail(view) {
   const avgAtlas = average(view.universe.topTen, (creator) => creator.atlasScore);
 
   const items = [
-    { title: "Best profile fit", copy: bestFit ? `${bestFit.username} at ${(bestFit.diagnostics.industryFit * 100).toFixed(1)}` : "No result" },
-    { title: "GMV leader", copy: topGmv ? `${topGmv.username} at ${formatCurrency(topGmv.metrics.total_gmv_30d)}` : "No result" },
-    { title: "Engagement leader", copy: topEngagement ? `${topEngagement.username} at ${formatPercent(topEngagement.metrics.engagement_rate)}` : "No result" },
+    {
+      title: "Best profile fit",
+      copy: bestFit ? `${creatorDisplayName(bestFit)} at ${(bestFit.diagnostics.industryFit * 100).toFixed(1)}` : "No result",
+    },
+    {
+      title: "GMV leader",
+      copy: topGmv ? `${creatorDisplayName(topGmv)} at ${formatCurrency(topGmv.metrics.total_gmv_30d)}` : "No result",
+    },
+    {
+      title: "Engagement leader",
+      copy: topEngagement ? `${creatorDisplayName(topEngagement)} at ${formatPercent(topEngagement.metrics.engagement_rate)}` : "No result",
+    },
     { title: "Top-10 average", copy: `${avgAtlas.toFixed(2)} atlas score` },
   ];
 
@@ -528,8 +741,9 @@ function renderLeaderboard(view) {
     row.innerHTML = `
       <td>${index + 1}</td>
       <td class="rank-cell">
-        <strong>${creator.username}</strong>
-        <span class="detail-copy">${creator.bio}</span>
+        <strong>${creatorDisplayName(creator)}</strong>
+        <span class="creator-handle">@${creator.username}</span>
+        <span class="detail-copy">${truncateText(creator.bio, 118)}</span>
       </td>
       <td>
         <div class="industry-badges">
@@ -687,8 +901,8 @@ function renderAdvisor(view) {
           .map(
             (creator, index) => `
               <article class="advisor-pick">
-                <strong>${index + 1}. ${creator.username}</strong>
-                <div class="detail-copy">${creator.bio}</div>
+                <strong>${index + 1}. ${creatorDisplayName(creator)}</strong>
+                <div class="detail-copy">${truncateText(creator.bio, 132)}</div>
               </article>
             `
           )
@@ -702,6 +916,32 @@ function renderAdvisor(view) {
       <div class="detail-copy">Complete the quiz to generate a recommendation.</div>
     `;
   }
+}
+
+function renderChartModal(view) {
+  const modal = document.getElementById("chartModal");
+  const body = document.getElementById("chartModalBody");
+  const label = document.getElementById("chartModalLabel");
+  const title = document.getElementById("chartModalTitle");
+
+  if (!state.expandedChart) {
+    modal.hidden = true;
+    body.innerHTML = "";
+    return;
+  }
+
+  modal.hidden = false;
+
+  if (state.expandedChart === "curve") {
+    label.textContent = "Expanded view";
+    title.textContent = "Universe score curve";
+    body.innerHTML = scoreDistributionMarkup(view, true);
+    return;
+  }
+
+  label.textContent = "Expanded view";
+  title.textContent = "Reach vs. GMV";
+  body.innerHTML = scatterPlotMarkup(view, true);
 }
 
 function attachEvents() {
@@ -727,6 +967,36 @@ function attachEvents() {
     state.showScoreHelp = !state.showScoreHelp;
     render();
   });
+
+  document.getElementById("curveBins").addEventListener("input", (event) => {
+    state.curveBins = Number(event.target.value);
+    render();
+  });
+
+  document.getElementById("scatterZoom").addEventListener("input", (event) => {
+    state.scatterZoom = Number(event.target.value);
+    render();
+  });
+
+  document.getElementById("expandCurve").addEventListener("click", () => {
+    state.expandedChart = "curve";
+    render();
+  });
+
+  document.getElementById("expandScatter").addEventListener("click", () => {
+    state.expandedChart = "scatter";
+    render();
+  });
+
+  document.getElementById("closeChartModal").addEventListener("click", () => {
+    state.expandedChart = null;
+    render();
+  });
+
+  document.getElementById("chartModalBackdrop").addEventListener("click", () => {
+    state.expandedChart = null;
+    render();
+  });
 }
 
 function render() {
@@ -738,9 +1008,12 @@ function render() {
   renderScoreDistribution(view);
   renderScatterPlot(view);
   renderIndustryMix(view);
+  renderEfficiencyPlot(view);
+  renderAudienceFitChart(view);
   renderSummaryRail(view);
   renderLeaderboard(view);
   renderAdvisor(view);
+  renderChartModal(view);
 }
 
 async function init() {

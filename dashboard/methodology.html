@@ -3,49 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlas Brief | Methodology</title>
+    <title>Atlas Brief | Atlas Method</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand-block">
-          <span class="brand-kicker">Atlas Brief</span>
-          <strong>Methodology & quantitative notes</strong>
-        </div>
+        <a class="brand-home brand-lockup" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-copy">
+            <span class="brand-kicker">Atlas Brief</span>
+            <strong>Atlas Method</strong>
+          </div>
+        </a>
         <nav class="topnav">
-          <a href="/">Dashboard</a>
-          <a href="#scoring">Scoring</a>
-          <a href="#diagnostics">Diagnostics</a>
-          <a href="#requirements">Requirements</a>
+          <a href="/">Home</a>
+          <a href="/demo.html">Demo</a>
+          <a href="#scoring">Score</a>
+          <a href="#weights">Weights</a>
+          <a href="#references">Research</a>
         </nav>
       </header>
 
       <main>
         <section class="section hero methodology-hero">
           <div class="hero-copy">
-            <span class="section-kicker">Quantitative appendix</span>
-            <h1>Formula-first notes for technical reviewers and decision-makers.</h1>
-            <p class="hero-text">
-              This page separates the math from the dashboard so the main product stays clean
-              while still giving technical stakeholders a rigorous explanation of the screening
-              logic.
-            </p>
+            <span class="section-kicker">Atlas Method</span>
+            <h1>Method</h1>
+            <p class="hero-text">A short explanation of the score, the weights, and the research behind the demo.</p>
           </div>
+          <aside class="hero-card" id="heroMetrics"></aside>
         </section>
 
         <section class="section" id="scoring">
           <div class="section-header">
             <div>
               <span class="section-kicker">Scoring stack</span>
-              <h2>Primary formulas</h2>
+              <h2>Core formulas</h2>
             </div>
           </div>
 
           <div class="formula-grid">
             <article class="panel">
               <span class="panel-label">Challenge engine</span>
-              <h3>Official hybrid score</h3>
+              <h3>Official ranker</h3>
               <pre class="formula-panel">projected_normalized = (projected_score - 60) / 40
 
 final_score =
@@ -53,11 +54,20 @@ final_score =
   alpha * semantic_score +
   (1 - alpha) * projected_normalized
 )</pre>
+              <p class="detail-copy formula-note">This is the official challenge formula: normalized semantics plus normalized projected value.</p>
+              <details class="expand-detail">
+                <summary>Longer explanation</summary>
+                <p class="detail-copy">
+                  The ranker uses a convex combination because projected score already carries
+                  meaningful business signal. Once both components are normalized, linear fusion
+                  preserves that magnitude instead of collapsing the decision into rank positions.
+                </p>
+              </details>
             </article>
 
             <article class="panel">
               <span class="panel-label">Dashboard screening</span>
-              <h3>Universe exploration score</h3>
+              <h3>Atlas screen</h3>
               <pre class="formula-panel">semantic_proxy = 0.55 * industry_match
                + 0.45 * query_overlap
 
@@ -72,11 +82,20 @@ atlas_score =
   0.15 * audience_fit +
   0.20 * commercial_index
 )</pre>
+              <p class="detail-copy formula-note">Atlas is the live demo score: stricter on relevance than on scale so the shortlist stays on-brief.</p>
+              <details class="expand-detail">
+                <summary>Longer explanation</summary>
+                <p class="detail-copy">
+                  Atlas is meant for exploration across the whole creator universe, not just the
+                  challenge output. That is why profile fit receives the largest weight and the
+                  commercial block is capped so pure size does not overwhelm contextual fit.
+                </p>
+              </details>
             </article>
 
             <article class="panel">
               <span class="panel-label">Quiz advisor</span>
-              <h3>Decision overlay</h3>
+              <h3>Advisor overlay</h3>
               <pre class="formula-panel">advisor_score =
   atlas_score
   + objective_bias
@@ -87,31 +106,52 @@ objective_bias favors:
 - GMV for sales
 - semantic fit for loyalty
 - reach and views for awareness</pre>
+              <p class="detail-copy formula-note">The advisor adds a light campaign bias on top of the base score.</p>
+              <details class="expand-detail">
+                <summary>Longer explanation</summary>
+                <p class="detail-copy">
+                  The quiz is not a second ranking system. It lightly tilts the shortlist based on
+                  campaign objective, voice, and rollout posture so the output feels closer to a
+                  planning recommendation than a static leaderboard.
+                </p>
+              </details>
             </article>
           </div>
+        </section>
+
+        <section class="section" id="weights">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Weight design</span>
+              <h2>Why the weights</h2>
+            </div>
+          </div>
+
+          <div class="insight-grid" id="rationaleGrid"></div>
+        </section>
+
+        <section class="section" id="references">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Evidence base</span>
+              <h2>Research</h2>
+            </div>
+          </div>
+
+          <div class="check-grid" id="referenceGrid"></div>
         </section>
 
         <section class="section" id="diagnostics">
           <div class="section-header">
             <div>
               <span class="section-kicker">Diagnostics</span>
-              <h2>What the dashboard benchmarks</h2>
+              <h2>Benchmarks</h2>
             </div>
           </div>
 
           <div class="check-grid" id="diagnosticGrid"></div>
         </section>
 
-        <section class="section" id="requirements">
-          <div class="section-header">
-            <div>
-              <span class="section-kicker">Requirement check</span>
-              <h2>Original README coverage</h2>
-            </div>
-          </div>
-
-          <div class="check-grid" id="requirementGrid"></div>
-        </section>
       </main>
     </div>
 

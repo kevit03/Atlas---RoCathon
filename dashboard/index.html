@@ -3,176 +3,181 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlas Brief | Creator Intelligence Console</title>
+    <title>Atlas Brief | Home</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="brand-block">
-          <div class="brand-lockup">
-            <span class="brand-mark" aria-hidden="true"></span>
-            <div class="brand-block">
-              <span class="brand-kicker">Atlas Brief</span>
-              <strong>Creator intelligence console</strong>
-            </div>
+  <body class="landing-page">
+    <div class="landing-shell">
+      <header class="landing-topbar">
+        <a class="brand-home brand-lockup" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-copy">
+            <span class="brand-kicker">Atlas Brief</span>
+            <strong>Creator intelligence, guided</strong>
           </div>
-        </div>
+        </a>
         <nav class="topnav">
-          <a href="#overview">Overview</a>
-          <a href="#analytics">Analytics</a>
-          <a href="#leaderboard">Leaderboard</a>
-          <a href="#advisor">Advisor</a>
+          <a href="#what-atlas-is">What Atlas Is</a>
+          <a href="#plain-english">Plain English</a>
+          <a href="#walkthrough">Walkthrough</a>
           <a href="/methodology.html">Methodology</a>
         </nav>
+        <a class="hero-button secondary compact-button" href="/demo.html">Enter demo</a>
       </header>
 
-      <div class="workspace">
-        <aside class="side-rail">
-          <section class="rail-card">
-            <span class="rail-label">Profile</span>
-            <h1>Overview dashboard</h1>
-            <p class="rail-copy" id="profileTagline">Loading...</p>
-          </section>
-
-          <section class="rail-card">
-            <div class="rail-section-head">
-              <span class="rail-label">Filters</span>
-              <span class="mode-chip" id="scenarioMode">Loading...</span>
+      <main>
+        <section class="landing-hero">
+          <div class="landing-copy">
+            <span class="landing-kicker">AI-guided creator screening</span>
+            <h1>Atlas turns creator research into a clean, explainable shortlist.</h1>
+            <p class="landing-subcopy">
+              Start here if you are new to the space. Atlas explains the jargon, shows how the
+              scoring works, and then hands you off to the live demo only when you are ready.
+            </p>
+            <div class="hero-actions">
+              <a class="hero-button primary" href="/demo.html">Open the demo</a>
+              <a class="hero-button secondary" href="#plain-english">Learn the terms</a>
             </div>
-            <label class="field">
-              <span>Brand profile</span>
-              <select id="profileSelect"></select>
-            </label>
-            <label class="field">
-              <span>Creator type</span>
-              <input id="typeSearch" type="text" placeholder="iphone, decor, premium..." />
-            </label>
-            <label class="field">
-              <span>Industry</span>
-              <select id="industrySelect"></select>
-            </label>
-          </section>
-
-          <section class="rail-card inspector-card">
-            <div class="rail-section-head">
-              <span class="rail-label">Atlas score</span>
-              <button class="text-button" id="toggleScoreHelp" type="button">How it works</button>
-            </div>
-            <div id="selectedCreatorSummary"></div>
-            <div class="score-breakdown" id="scoreBreakdown"></div>
-            <div class="score-help" id="scoreHelp" hidden>
-              <p>Atlas Score blends profile fit, query alignment, audience alignment, and commercial quality.</p>
-              <a href="/methodology.html">View formulas</a>
-            </div>
-          </section>
-
-          <section class="rail-card">
-            <span class="rail-label">Universe</span>
-            <div class="stack-metrics">
-              <div>
-                <small>Creators analyzed</small>
-                <strong id="universeCount">Loading...</strong>
-              </div>
-              <div>
-                <small>Last refresh</small>
-                <strong id="generatedAt">Loading...</strong>
-              </div>
-            </div>
-          </section>
-        </aside>
-
-        <main class="content-pane">
-          <section class="section" id="overview">
-            <div class="kpi-grid" id="kpiGrid"></div>
-          </section>
-
-          <section class="section" id="analytics">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Analytics</span>
-                <h2>Market-wide diagnostics</h2>
-              </div>
-              <p class="section-caption" id="analyticsCaption"></p>
-            </div>
-
-            <div class="analytics-grid">
-              <article class="panel">
-                <div class="panel-header">
-                  <span class="panel-label">Score distribution</span>
-                  <h3>Universe score curve</h3>
-                </div>
-                <div class="chart-host compact" id="scoreDistribution"></div>
+            <div class="hero-stat-row">
+              <article class="hero-stat">
+                <span class="panel-label">Creators screened</span>
+                <strong id="heroCreatorCount">200</strong>
               </article>
-
-              <article class="panel">
-                <div class="panel-header">
-                  <span class="panel-label">Commercial scale</span>
-                  <h3>Reach vs. GMV</h3>
-                </div>
-                <div class="chart-host compact" id="scatterPlot"></div>
+              <article class="hero-stat">
+                <span class="panel-label">Brand profiles</span>
+                <strong id="heroProfileCount">5</strong>
               </article>
-
-              <article class="panel">
-                <div class="panel-header">
-                  <span class="panel-label">Industry mix</span>
-                  <h3>Current market composition</h3>
-                </div>
-                <div class="mix-list" id="industryMix"></div>
+              <article class="hero-stat">
+                <span class="panel-label">Primary signals</span>
+                <strong>4</strong>
               </article>
             </div>
-          </section>
+          </div>
 
-          <section class="section" id="leaderboard">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Leaderboard</span>
-                <h2>Top-ranked creators</h2>
-              </div>
-              <p class="section-caption">Click a row to inspect the creator and score components.</p>
-            </div>
+          <div class="landing-visual-card">
+            <img
+              class="landing-visual"
+              src="/atlas-hero.svg"
+              alt="Illustration of Atlas combining creator fit, semantic matching, and commercial signals into one shortlist."
+            />
+          </div>
+        </section>
 
-            <div class="summary-rail" id="summaryRail"></div>
+        <section class="landing-section" id="what-atlas-is">
+          <div class="landing-section-head">
+            <span class="section-kicker">What Atlas is</span>
+            <h2>A guided front door before the analytics console.</h2>
+          </div>
 
-            <article class="table-panel">
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Creator</th>
-                      <th>Industry</th>
-                      <th>Atlas score</th>
-                      <th>Projected</th>
-                      <th>30D GMV</th>
-                      <th>Views</th>
-                      <th>Engagement</th>
-                    </tr>
-                  </thead>
-                  <tbody id="leaderboardBody"></tbody>
-                </table>
-              </div>
+          <div class="landing-card-grid">
+            <article class="landing-card">
+              <span class="panel-label">Screening engine</span>
+              <h3>It ranks creators by fit and commercial quality.</h3>
+              <p class="detail-copy">
+                Atlas combines creator category fit, language alignment, audience fit, and
+                commercial strength into one score so teams can move from raw creator data to an
+                investable shortlist.
+              </p>
             </article>
-          </section>
 
-          <section class="section" id="advisor">
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">Advisor</span>
-                <h2>Campaign walkthrough</h2>
-              </div>
-              <p class="section-caption">Three quick choices to turn the dashboard into a recommendation engine.</p>
-            </div>
+            <article class="landing-card">
+              <span class="panel-label">Decision support</span>
+              <h3>It explains the numbers in plain English.</h3>
+              <p class="detail-copy">
+                You do not need to already know what GMV, projected score, or semantic retrieval
+                mean. The walkthrough introduces the terms before the demo starts.
+              </p>
+            </article>
 
-            <div class="advisor-grid">
-              <article class="panel" id="quizMount"></article>
-              <article class="panel" id="advisorOutput"></article>
+            <article class="landing-card">
+              <span class="panel-label">Live console</span>
+              <h3>It then opens into the interactive demo.</h3>
+              <p class="detail-copy">
+                The demo is where you filter creators, inspect scores, compare graphs, and run the
+                campaign advisor. The home page is the orientation layer.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="landing-section split-section" id="plain-english">
+          <div class="landing-section-head">
+            <span class="section-kicker">Plain English</span>
+            <h2>Core terms without the industry jargon.</h2>
+          </div>
+
+          <div class="glossary-grid">
+            <article class="glossary-card">
+              <strong>Atlas Score</strong>
+              <p class="detail-copy">A screening score that blends creator fit, query fit, audience fit, and commercial quality.</p>
+            </article>
+            <article class="glossary-card">
+              <strong>GMV</strong>
+              <p class="detail-copy">Gross merchandise value. In simple terms, how much product value a creator helped drive.</p>
+            </article>
+            <article class="glossary-card">
+              <strong>Projected score</strong>
+              <p class="detail-copy">RoC’s forward-looking business signal. It estimates how commercially strong a creator is likely to be.</p>
+            </article>
+            <article class="glossary-card">
+              <strong>Semantic fit</strong>
+              <p class="detail-copy">How well a creator’s content meaning matches the brief, not just exact keywords.</p>
+            </article>
+            <article class="glossary-card">
+              <strong>Audience fit</strong>
+              <p class="detail-copy">How closely a creator’s audience lines up with the brand’s target demographic profile.</p>
+            </article>
+            <article class="glossary-card">
+              <strong>Why it matters</strong>
+              <p class="detail-copy">Atlas helps teams avoid high-reach creators who are commercially or contextually wrong for the brand.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="landing-section walkthrough-section" id="walkthrough">
+          <div class="landing-section-head">
+            <span class="section-kicker">Walkthrough</span>
+            <h2>What happens when you enter the demo.</h2>
+          </div>
+
+          <div class="walkthrough-grid">
+            <article class="step-card">
+              <span class="step-number">01</span>
+              <h3>Choose a brand profile</h3>
+              <p class="detail-copy">Start from a business scenario such as smart home, beauty, or consumer electronics.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-number">02</span>
+              <h3>Filter the creator universe</h3>
+              <p class="detail-copy">Search by creator type, narrow by industry, and inspect how the score changes as the brief becomes more specific.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-number">03</span>
+              <h3>Read the recommendation</h3>
+              <p class="detail-copy">Open the charts, inspect the score components, and use the advisor to bias toward sales, loyalty, or reach.</p>
+            </article>
+          </div>
+
+          <div class="process-strip">
+            <img
+              class="process-visual"
+              src="/atlas-flow.svg"
+              alt="Flow diagram showing Atlas moving from raw creator data to semantic fit, commercial scoring, and a final shortlist."
+            />
+            <div class="process-copy">
+              <span class="panel-label">Inside the engine</span>
+              <h3>Data in. Explanation out.</h3>
+              <p class="detail-copy">
+                Atlas takes creator data, applies hybrid scoring, and returns a shortlist with a
+                readable explanation instead of a black-box ranking.
+              </p>
+              <a class="hero-button primary compact-button" href="/demo.html">Go to demo</a>
             </div>
-          </section>
-        </main>
-      </div>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <script src="/app.js" defer></script>
+    <script src="/landing.js" defer></script>
   </body>
 </html>
