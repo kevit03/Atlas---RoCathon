@@ -3,192 +3,163 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlas Brief | Executive Creator Match Dashboard</title>
+    <title>Atlas Brief | Executive Creator Intelligence</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="page-shell">
+    <div class="app-shell">
       <header class="topbar">
-        <div class="brand-lockup">
-          <p class="eyebrow">Atlas Brief</p>
-          <strong>Executive Creator Match Dashboard</strong>
+        <div class="brand-block">
+          <span class="brand-kicker">Atlas Brief</span>
+          <strong>Executive creator intelligence</strong>
         </div>
-        <nav class="hotbar">
+        <nav class="topnav">
           <a href="#overview">Overview</a>
-          <a href="#portfolio">Portfolio</a>
           <a href="#analytics">Analytics</a>
+          <a href="#leaderboard">Leaderboard</a>
           <a href="#advisor">Advisor</a>
-          <a href="#methodology">Method</a>
+          <a href="/methodology.html">Methodology</a>
         </nav>
       </header>
 
       <main>
-        <section class="hero section reveal" id="overview">
+        <section class="section hero" id="overview">
           <div class="hero-copy">
-            <p class="eyebrow">RoC Match Intelligence</p>
-            <h1>Shortlist the right creators, then explain the decision like an executive team would.</h1>
-            <p class="hero-summary">
-              Explore brand-profile scenarios, filter creator types, compare analytics, and
-              walk through a guided strategy quiz without exposing the technical scoring model
-              up front.
+            <span class="section-kicker">RoC signal engine</span>
+            <h1>Use the full creator universe to surface clean, board-ready recommendations.</h1>
+            <p class="hero-text">
+              Atlas Brief evaluates the entire creator dataset, benchmarks the active profile
+              against the broader market, and turns the result into a business-facing decision
+              surface.
             </p>
           </div>
-          <aside class="hero-side">
-            <div class="meta-card">
-              <span class="meta-label">Active Brand</span>
-              <strong id="activeBrandLabel">Loading...</strong>
+
+          <aside class="hero-aside">
+            <div class="mini-stat">
+              <span class="mini-label">Active profile</span>
+              <strong id="activeProfileLabel">Loading...</strong>
             </div>
-            <div class="meta-card">
-              <span class="meta-label">Scenario Mode</span>
-              <strong id="scenarioMode">Loading...</strong>
+            <div class="mini-stat">
+              <span class="mini-label">Universe analyzed</span>
+              <strong id="universeCount">Loading...</strong>
             </div>
-            <div class="meta-card">
-              <span class="meta-label">Last Generated</span>
+            <div class="mini-stat">
+              <span class="mini-label">Last refreshed</span>
               <strong id="generatedAt">Loading...</strong>
             </div>
           </aside>
         </section>
 
-        <section class="section reveal">
-          <article class="control-panel">
-            <div class="section-head compact">
-              <div>
-                <p class="eyebrow">Explorer</p>
-                <h2>Choose A Brand Profile</h2>
-              </div>
-              <span class="mode-pill" id="modeBadge">Loading...</span>
+        <section class="section filter-strip">
+          <div class="filter-grid">
+            <label class="field">
+              <span>Brand profile</span>
+              <select id="profileSelect"></select>
+            </label>
+            <label class="field">
+              <span>Creator type</span>
+              <input id="typeSearch" type="text" placeholder="iphone, decor, premium, studio..." />
+            </label>
+            <label class="field">
+              <span>Industry</span>
+              <select id="industrySelect"></select>
+            </label>
+            <div class="field field-static">
+              <span>Scenario mode</span>
+              <strong id="scenarioMode">Loading...</strong>
             </div>
-            <div class="control-grid">
-              <label class="control-field">
-                <span>Brand profile</span>
-                <select id="profileSelect"></select>
-              </label>
-              <label class="control-field">
-                <span>Creator type or keyword</span>
-                <input id="typeSearch" type="text" placeholder="Try: iphone, decor, premium, studio..." />
-              </label>
-              <label class="control-field">
-                <span>Industry filter</span>
-                <select id="industrySelect"></select>
-              </label>
-            </div>
-            <div class="profile-card-grid" id="profileCardGrid"></div>
-          </article>
+          </div>
         </section>
 
-        <section class="section reveal">
-          <div class="metric-grid" id="metricGrid"></div>
-        </section>
+        <section class="section kpi-grid" id="kpiGrid"></section>
 
-        <section class="section reveal" id="portfolio">
-          <div class="section-head">
+        <section class="section" id="analytics">
+          <div class="section-header">
             <div>
-              <p class="eyebrow">Portfolio</p>
-              <h2>Recommended Creator Set</h2>
+              <span class="section-kicker">Analytics</span>
+              <h2>Market-wide diagnostics</h2>
             </div>
-            <p class="section-copy" id="portfolioSummary"></p>
+            <p class="section-caption" id="analyticsCaption"></p>
           </div>
 
-          <div class="portfolio-layout">
-            <article class="feature-card" id="featuredCandidate"></article>
+          <div class="analytics-grid">
             <article class="panel">
-              <div class="panel-head">
-                <p class="eyebrow">Executive Readout</p>
-                <h3>What The Current Slate Signals</h3>
+              <div class="panel-header">
+                <span class="panel-label">Score distribution</span>
+                <h3>Universe score ladder</h3>
               </div>
-              <div class="insight-list" id="insightList"></div>
+              <div class="chart-host" id="scoreDistribution"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <span class="panel-label">Commercial scale</span>
+                <h3>Reach vs. GMV</h3>
+              </div>
+              <div class="chart-host" id="scatterPlot"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <span class="panel-label">Industry mix</span>
+                <h3>Top category concentration</h3>
+              </div>
+              <div class="mix-list" id="industryMix"></div>
             </article>
           </div>
-
-          <article class="panel">
-            <div class="panel-head">
-              <p class="eyebrow">Candidates</p>
-              <h3>Ranked Recommendations</h3>
-            </div>
-            <div class="rank-list" id="rankList"></div>
-          </article>
         </section>
 
-        <section class="section reveal" id="analytics">
-          <div class="section-head">
+        <section class="section" id="leaderboard">
+          <div class="section-header">
             <div>
-              <p class="eyebrow">Analytics</p>
-              <h2>Performance And Mix</h2>
+              <span class="section-kicker">Leaderboard</span>
+              <h2>Top-ranked creators</h2>
             </div>
-            <p class="section-copy">
-              Visual readouts for score spread, commercial scale, and category concentration.
+            <p class="section-caption">
+              Sorted by Atlas screening score across the filtered universe. The top of the table
+              is optimized for business selection, not just semantic novelty.
             </p>
           </div>
 
-          <div class="chart-grid">
-            <article class="panel">
-              <div class="panel-head">
-                <p class="eyebrow">Score Distribution</p>
-                <h3>Final Score Ladder</h3>
-              </div>
-              <div id="scoreChart" class="chart-frame"></div>
-            </article>
+          <div class="summary-rail" id="summaryRail"></div>
 
-            <article class="panel">
-              <div class="panel-head">
-                <p class="eyebrow">Scale Mapping</p>
-                <h3>Reach Vs. GMV</h3>
-              </div>
-              <div id="scatterChart" class="chart-frame"></div>
-            </article>
+          <article class="table-panel">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Creator</th>
+                    <th>Industry</th>
+                    <th>Atlas score</th>
+                    <th>Projected</th>
+                    <th>30D GMV</th>
+                    <th>Views</th>
+                    <th>Engagement</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboardBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
 
-            <article class="panel">
-              <div class="panel-head">
-                <p class="eyebrow">Category Mix</p>
-                <h3>Industry Concentration</h3>
-              </div>
-              <div class="distribution-list" id="distributionList"></div>
-            </article>
+        <section class="section" id="advisor">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Advisor</span>
+              <h2>Guided campaign recommendation</h2>
+            </div>
+            <p class="section-caption">
+              A short three-question flow that turns the current profile into a launch-ready
+              recommendation set.
+            </p>
           </div>
-        </section>
 
-        <section class="section reveal" id="advisor">
-          <article class="advisor-shell">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Atlas Advisor</p>
-                <h2>Would You Like To Take A Quiz?</h2>
-              </div>
-              <p class="section-copy">
-                Answer three quick questions and get a campaign recommendation tailored to the
-                selected brand profile.
-              </p>
-            </div>
-
-            <div id="quizMount"></div>
-            <div id="advisorOutput"></div>
-          </article>
-        </section>
-
-        <section class="section reveal" id="methodology">
-          <article class="panel muted-panel">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Methodology</p>
-                <h2>Technical Notes And Requirement Check</h2>
-              </div>
-              <p class="section-copy">
-                The scoring formula and implementation details are intentionally placed at the
-                back so the main experience stays presentation-first.
-              </p>
-            </div>
-
-            <div class="checklist-grid" id="checklistGrid"></div>
-
-            <details class="formula-details">
-              <summary>Show scoring formula and runtime details</summary>
-              <div class="formula-block">
-                <span>projected_normalized = (projected_score - 60) / 40</span>
-                <span>final_score = 100 * (alpha * semantic_score + (1 - alpha) * projected_normalized)</span>
-              </div>
-              <div class="pill-row" id="methodPills"></div>
-            </details>
-          </article>
+          <div class="advisor-grid">
+            <article class="panel" id="quizMount"></article>
+            <article class="panel" id="advisorOutput"></article>
+          </div>
         </section>
       </main>
     </div>

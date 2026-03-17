@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atlas Brief | Methodology</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="brand-kicker">Atlas Brief</span>
+          <strong>Methodology & quantitative notes</strong>
+        </div>
+        <nav class="topnav">
+          <a href="/">Dashboard</a>
+          <a href="#scoring">Scoring</a>
+          <a href="#diagnostics">Diagnostics</a>
+          <a href="#requirements">Requirements</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section hero methodology-hero">
+          <div class="hero-copy">
+            <span class="section-kicker">Quantitative appendix</span>
+            <h1>Formula-first notes for technical reviewers and decision-makers.</h1>
+            <p class="hero-text">
+              This page separates the math from the dashboard so the main product stays clean
+              while still giving technical stakeholders a rigorous explanation of the screening
+              logic.
+            </p>
+          </div>
+        </section>
+
+        <section class="section" id="scoring">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Scoring stack</span>
+              <h2>Primary formulas</h2>
+            </div>
+          </div>
+
+          <div class="formula-grid">
+            <article class="panel">
+              <span class="panel-label">Challenge engine</span>
+              <h3>Official hybrid score</h3>
+              <pre class="formula-panel">projected_normalized = (projected_score - 60) / 40
+
+final_score =
+100 * (
+  alpha * semantic_score +
+  (1 - alpha) * projected_normalized
+)</pre>
+            </article>
+
+            <article class="panel">
+              <span class="panel-label">Dashboard screening</span>
+              <h3>Universe exploration score</h3>
+              <pre class="formula-panel">semantic_proxy = 0.55 * industry_match
+               + 0.45 * query_overlap
+
+commercial_index = 0.65 * projected_normalized
+                 + 0.20 * engagement_norm
+                 + 0.15 * gmv_norm
+
+atlas_score =
+100 * (
+  0.38 * industry_match +
+  0.27 * query_overlap +
+  0.15 * audience_fit +
+  0.20 * commercial_index
+)</pre>
+            </article>
+
+            <article class="panel">
+              <span class="panel-label">Quiz advisor</span>
+              <h3>Decision overlay</h3>
+              <pre class="formula-panel">advisor_score =
+  atlas_score
+  + objective_bias
+  + persona_bias
+  + posture_bias
+
+objective_bias favors:
+- GMV for sales
+- semantic fit for loyalty
+- reach and views for awareness</pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="diagnostics">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Diagnostics</span>
+              <h2>What the dashboard benchmarks</h2>
+            </div>
+          </div>
+
+          <div class="check-grid" id="diagnosticGrid"></div>
+        </section>
+
+        <section class="section" id="requirements">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Requirement check</span>
+              <h2>Original README coverage</h2>
+            </div>
+          </div>
+
+          <div class="check-grid" id="requirementGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/methodology.js" defer></script>
+  </body>
+</html>
