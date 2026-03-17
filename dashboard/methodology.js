@@ -68,18 +68,18 @@ async function init() {
           "This keeps both components on the same scale while preserving score magnitude. Because projected_score already contains business signal, a linear blend is more useful here than a rank-only fusion rule.",
       },
       {
-        status: "Priority",
-        title: "Largest weight: fit",
-        copy: "Profile fit gets the largest weight so off-brief creators do not rise on scale alone.",
+        status: "Objective",
+        title: "Equal relevance treatment",
+        copy: "Industry fit, query overlap, and audience fit are averaged equally inside one relevance block.",
         details:
-          "Atlas is a screening layer, so it needs to protect contextual fit first. High reach or GMV can be attractive, but if the creator misses the category the shortlist becomes harder to defend.",
+          "This removes the need to justify separate hand-picked coefficients for each relevance feature. The dashboard can describe the model as a neutral average across three fit signals instead of a bespoke percentage split.",
       },
       {
         status: "Balance",
-        title: "Query stays second",
-        copy: "Query overlap matters, but it sits below durable profile fit.",
+        title: "Two-stage blend",
+        copy: "Atlas blends 60% relevance with 40% commercial quality.",
         details:
-          "Campaign wording should influence the screen, but short prompt phrasing should not overpower the broader brand category. That is why query overlap remains below industry fit in Atlas.",
+          "The top-level choice is now explicit and easy to defend: relevance should lead the screen, but commerce still matters materially. That creates one interpretable business decision instead of four smaller subjective ones.",
       },
       {
         status: "Commercial",

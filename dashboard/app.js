@@ -282,10 +282,26 @@ function buildPdfReportHtml(view) {
 
   const topCreatorBars = topCreator
     ? [
-        { label: "Profile fit", weight: "38%", value: topCreator.diagnostics.industryFit },
-        { label: "Query alignment", weight: "27%", value: topCreator.diagnostics.queryOverlap },
-        { label: "Audience fit", weight: "15%", value: topCreator.diagnostics.audienceFit },
-        { label: "Commercial quality", weight: "20%", value: topCreator.diagnostics.commercialIndex },
+        {
+          label: "Industry match",
+          weight: "1/3 relevance",
+          value: topCreator.diagnostics.industryFit,
+        },
+        {
+          label: "Query overlap",
+          weight: "1/3 relevance",
+          value: topCreator.diagnostics.queryOverlap,
+        },
+        {
+          label: "Audience fit",
+          weight: "1/3 relevance",
+          value: topCreator.diagnostics.audienceFit,
+        },
+        {
+          label: "Commercial quality",
+          weight: "40% final",
+          value: topCreator.diagnostics.commercialIndex,
+        },
       ]
         .map(
           (item) => `
@@ -678,15 +694,16 @@ function buildPdfReportHtml(view) {
 
             <aside class="method-note">
               <p class="eyebrow">Scoring logic</p>
-              <h3>Atlas weights fit ahead of scale</h3>
+              <h3>Atlas uses a two-stage objective blend</h3>
               <p class="copy">
-                The dashboard score is intentionally front-loaded toward profile and query relevance so the shortlist does not over-index on large but off-brief creators. Commercial quality enters after fit is established.
+                The dashboard score first averages three relevance signals equally, then blends that relevance block against a commercial quality block. That makes the model easier to defend than a hand-tuned four-way split.
               </p>
-              <div class="formula">atlas_score = 100 * (
-  0.38 * profile_fit +
-  0.27 * query_alignment +
-  0.15 * audience_fit +
-  0.20 * commercial_quality
+              <div class="formula">relevance_score =
+  (industry_match + query_overlap + audience_fit) / 3
+
+atlas_score = 100 * (
+  0.60 * relevance_score +
+  0.40 * commercial_quality
 )</div>
               <p class="copy">
                 Commercial quality is itself blended from normalized projected score, engagement, and log-scaled GMV. The official challenge score remains available in the app's methodology view.
@@ -809,15 +826,10 @@ function buildUniverse(profileDetail) {
         0.65 * normalizeProjected(creator.projected_score) +
         0.2 * clamp(creator.metrics.engagement_rate / 0.12) +
         0.15 * normalizeLog(creator.metrics.total_gmv_30d, maxGmv);
-      const semanticProxy = 0.55 * industry + 0.45 * queryOverlap;
+      const relevanceScore = (industry + queryOverlap + audience) / 3;
+      const semanticProxy = relevanceScore;
       const atlasScore =
-        100 *
-        clamp(
-          0.38 * industry +
-            0.27 * queryOverlap +
-            0.15 * audience +
-            0.2 * commercialIndex
-        );
+        100 * clamp(0.6 * relevanceScore + 0.4 * commercialIndex);
 
       return {
         ...creator,
@@ -826,6 +838,7 @@ function buildUniverse(profileDetail) {
           industryFit: round(industry, 4),
           queryOverlap: round(queryOverlap, 4),
           audienceFit: round(audience, 4),
+          relevanceScore: round(relevanceScore, 4),
           commercialIndex: round(commercialIndex, 4),
           semanticProxy: round(semanticProxy, 4),
           gmvNorm: round(normalizeLog(creator.metrics.total_gmv_30d, maxGmv), 4),
@@ -935,10 +948,10 @@ function renderSelectedCreator(view) {
   `;
 
   const items = [
-    { label: "Profile fit (38%)", value: creator.diagnostics.industryFit },
-    { label: "Query overlap (27%)", value: creator.diagnostics.queryOverlap },
-    { label: "Audience fit (15%)", value: creator.diagnostics.audienceFit },
-    { label: "Commercial quality (20%)", value: creator.diagnostics.commercialIndex },
+    { label: "Industry match (1/3 relevance)", value: creator.diagnostics.industryFit },
+    { label: "Query overlap (1/3 relevance)", value: creator.diagnostics.queryOverlap },
+    { label: "Audience fit (1/3 relevance)", value: creator.diagnostics.audienceFit },
+    { label: "Commercial quality (40% final)", value: creator.diagnostics.commercialIndex },
   ];
 
   breakdown.innerHTML = items

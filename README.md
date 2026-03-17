@@ -181,12 +181,10 @@ Why this matters:
 
 The live demo uses a separate screening score for exploring the full creator universe:
 
-- `38%` profile fit
-- `27%` query overlap
-- `15%` audience fit
-- `20%` commercial quality
+- `relevance_score = (industry_match + query_overlap + audience_fit) / 3`
+- `atlas_score = 100 * (0.60 * relevance_score + 0.40 * commercial_quality)`
 
-That score is for exploration and explanation. The official challenge ranker remains preserved separately.
+That score is for exploration and explanation. It uses equal treatment inside the relevance block, then blends relevance against commercial quality with one top-level business decision. The official challenge ranker remains preserved separately.
 
 ## Architecture
 

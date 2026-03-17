@@ -20,7 +20,7 @@
           <a href="/">Home</a>
           <a href="/demo.html">Demo</a>
           <a href="#scoring">Score</a>
-          <a href="#weights">Weights</a>
+          <a href="#weights">Model choice</a>
           <a href="#references">Research</a>
         </nav>
       </header>
@@ -30,7 +30,7 @@
           <div class="hero-copy">
             <span class="section-kicker">Atlas Method</span>
             <h1>Method</h1>
-            <p class="hero-text">A short explanation of the score, the weights, and the research behind the demo.</p>
+            <p class="hero-text">A short explanation of the score, the model choice, and the research behind the demo.</p>
           </div>
           <aside class="hero-card" id="heroMetrics"></aside>
         </section>
@@ -68,27 +68,28 @@ final_score =
             <article class="panel">
               <span class="panel-label">Dashboard screening</span>
               <h3>Atlas screen</h3>
-              <pre class="formula-panel">semantic_proxy = 0.55 * industry_match
-               + 0.45 * query_overlap
-
-commercial_index = 0.65 * projected_normalized
+              <pre class="formula-panel">commercial_index = 0.65 * projected_normalized
                  + 0.20 * engagement_norm
                  + 0.15 * gmv_norm
 
+relevance_score =
+  (industry_match + query_overlap + audience_fit) / 3
+
 atlas_score =
 100 * (
-  0.38 * industry_match +
-  0.27 * query_overlap +
-  0.15 * audience_fit +
-  0.20 * commercial_index
+  0.60 * relevance_score +
+  0.40 * commercial_index
 )</pre>
-              <p class="detail-copy formula-note">Atlas is the live demo score: stricter on relevance than on scale so the shortlist stays on-brief.</p>
+              <p class="detail-copy formula-note">Atlas is the live demo score: three relevance signals are treated equally, then blended against a commercial quality block.</p>
               <details class="expand-detail">
                 <summary>Longer explanation</summary>
                 <p class="detail-copy">
                   Atlas is meant for exploration across the whole creator universe, not just the
-                  challenge output. That is why profile fit receives the largest weight and the
-                  commercial block is capped so pure size does not overwhelm contextual fit.
+                  challenge output. Instead of assigning different hand-picked weights to every
+                  relevance feature, the model averages industry fit, query overlap, and audience
+                  fit equally. That relevance block is then blended 60/40 against commercial
+                  quality so fit still leads the screen without introducing arbitrary fine-grained
+                  coefficients.
                 </p>
               </details>
             </article>
@@ -122,8 +123,8 @@ objective_bias favors:
         <section class="section" id="weights">
           <div class="section-header">
             <div>
-              <span class="section-kicker">Weight design</span>
-              <h2>Why the weights</h2>
+              <span class="section-kicker">Model choice</span>
+              <h2>Why this structure</h2>
             </div>
           </div>
 
