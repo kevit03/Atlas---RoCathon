@@ -11,6 +11,15 @@ Atlas Brief is a creator-screening product built for the RoC hackathon. It ranks
 - exports the top 10 as JSON
 - presents the results in a polished dashboard with charts, filters, and PDF export
 
+## Challenge Check
+
+- `searchCreators(query, brandProfile): RankedCreator[]` is implemented in `src/searchCreators.ts`
+- Postgres + `pgvector` setup is included in `sql/schema.sql`
+- DB ingestion is included in `scripts/ingest.ts`
+- official top-10 output is written to `output/brand_smart_home_top10.json`
+- README setup instructions are included here
+- Loom is the only submission item that must still be recorded separately
+
 ## Quick Start
 
 For the fastest local path with no OpenAI key or Postgres:
@@ -52,12 +61,12 @@ projected_normalized = (projected_score - 60) / 40
 
 final_score =
   100 * (
-    alpha * semantic_score +
-    (1 - alpha) * projected_normalized
+    0.45 * semantic_score +
+    0.55 * projected_normalized
   )
 ```
 
-This is a convex combination of normalized semantic relevance and normalized projected value.
+This follows the recommended starting point from the challenge: semantic relevance blended with a slightly stronger projected-value weight.
 
 ### Atlas demo score
 
@@ -103,6 +112,8 @@ npm run ingest
 npm run demo
 npm run dashboard
 ```
+
+The intended submission path is the `Postgres + pgvector` flow above. The in-memory mode exists only for easy local review of the UI.
 
 ## Main Commands
 

@@ -70,7 +70,7 @@ async function init() {
       {
         status: "Objective",
         title: "Equal relevance treatment",
-        copy: "Industry fit, query overlap, and audience fit are averaged equally inside one relevance block.",
+        copy: "Industry fit, query overlap, and audience fit are averaged equally.",
         details:
           "This removes the need to justify separate hand-picked coefficients for each relevance feature. The dashboard can describe the model as a neutral average across three fit signals instead of a bespoke percentage split.",
       },
@@ -87,29 +87,6 @@ async function init() {
         copy: "Commercial quality is capped, then divided across projected score, engagement, and GMV.",
         details:
           "Projected score leads the block because it is already a forward-looking business indicator from RoC. Engagement adds creator quality and GMV adds evidence of conversion, but neither is allowed to dominate the screen.",
-      },
-    ]);
-
-    renderCards("diagnosticGrid", [
-      {
-        status: "Universe",
-        title: `${data.creators.length} creators analyzed`,
-        copy: "The dashboard evaluates the full dataset, not just the challenge shortlist, so profile switching and filtering operate on the entire market universe.",
-      },
-      {
-        status: "Benchmark",
-        title: "Commercial normalization",
-        copy: "GMV, views, engagement, and projected score are normalized before use so large raw values do not dominate the ranking unfairly.",
-      },
-      {
-        status: "Screening",
-        title: "Profile-aware scoring",
-        copy: "Industry fit, keyword overlap, audience alignment, and commercial quality are blended into one screening score for exploration mode.",
-      },
-      {
-        status: "Advisor",
-        title: "Decision overlay",
-        copy: "The three-question advisor shifts the recommendation emphasis toward sales, loyalty, or reach depending on the campaign goal.",
       },
     ]);
 

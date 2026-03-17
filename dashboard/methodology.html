@@ -30,7 +30,7 @@
           <div class="hero-copy">
             <span class="section-kicker">Atlas Method</span>
             <h1>Method</h1>
-            <p class="hero-text">A short explanation of the score, the model choice, and the research behind the demo.</p>
+            <p class="hero-text">A short explanation of the score and the research behind it.</p>
           </div>
           <aside class="hero-card" id="heroMetrics"></aside>
         </section>
@@ -51,10 +51,10 @@
 
 final_score =
 100 * (
-  alpha * semantic_score +
-  (1 - alpha) * projected_normalized
+  0.45 * semantic_score +
+  0.55 * projected_normalized
 )</pre>
-              <p class="detail-copy formula-note">This is the official challenge formula: normalized semantics plus normalized projected value.</p>
+              <p class="detail-copy formula-note">This is the official challenge formula: normalized semantics plus normalized projected value, using the recommended 0.45 / 0.55 starting blend.</p>
               <details class="expand-detail">
                 <summary>Longer explanation</summary>
                 <p class="detail-copy">
@@ -140,17 +140,6 @@ objective_bias favors:
           </div>
 
           <div class="check-grid" id="referenceGrid"></div>
-        </section>
-
-        <section class="section" id="diagnostics">
-          <div class="section-header">
-            <div>
-              <span class="section-kicker">Diagnostics</span>
-              <h2>Benchmarks</h2>
-            </div>
-          </div>
-
-          <div class="check-grid" id="diagnosticGrid"></div>
         </section>
 
       </main>

@@ -18,9 +18,9 @@
         </a>
         <nav class="topnav">
           <a href="/">Home</a>
-          <a href="#analytics">Analytics</a>
-          <a href="#leaderboard">Leaderboard</a>
-          <a href="#advisor">Advisor</a>
+          <a href="#analytics">Charts</a>
+          <a href="#leaderboard">Top picks</a>
+          <a href="#advisor">Planner</a>
           <a href="/methodology.html">Methodology</a>
         </nav>
       </header>
@@ -29,21 +29,20 @@
         <aside class="side-rail">
           <section class="rail-card">
             <span class="rail-label">Profile</span>
-            <h1>Demo console</h1>
+            <h1>Shortlist</h1>
             <p class="rail-copy" id="profileTagline">Loading...</p>
           </section>
 
           <section class="rail-card">
             <div class="rail-section-head">
               <span class="rail-label">Filters</span>
-              <span class="mode-chip" id="scenarioMode">Loading...</span>
             </div>
             <label class="field">
               <span>Brand profile</span>
               <select id="profileSelect"></select>
             </label>
             <label class="field">
-              <span>Creator type</span>
+              <span>Search</span>
               <input id="typeSearch" type="text" placeholder="iphone, decor, premium..." />
             </label>
             <label class="field">
@@ -60,8 +59,8 @@
             <div id="selectedCreatorSummary"></div>
             <div class="score-breakdown" id="scoreBreakdown"></div>
             <div class="score-help" id="scoreHelp" hidden>
-              <p><strong>Atlas Score is a screening index.</strong> It averages three relevance signals equally, then blends that relevance block with a commercial quality block.</p>
-              <p>Relevance contributes 60% of the score. Commercial quality contributes 40%.</p>
+              <p><strong>Atlas Score</strong> blends fit and business quality.</p>
+              <p>60% relevance. 40% commercial quality.</p>
               <a href="/methodology.html">View method and evidence</a>
             </div>
           </section>
@@ -89,8 +88,8 @@
           <section class="section" id="analytics">
             <div class="section-header">
               <div>
-                <span class="section-kicker">Analytics</span>
-                <h2>Market-wide diagnostics</h2>
+                <span class="section-kicker">Charts</span>
+                <h2>How the market looks</h2>
               </div>
               <p class="section-caption" id="analyticsCaption"></p>
             </div>
@@ -165,18 +164,15 @@
           <section class="section" id="leaderboard">
             <div class="section-header">
               <div>
-                <span class="section-kicker">Leaderboard</span>
-                <h2>Top-ranked creators</h2>
+                <span class="section-kicker">Top picks</span>
+                <h2>Best matches</h2>
               </div>
               <div class="section-actions">
-                <p class="section-caption">Click a row to inspect the creator and score components.</p>
                 <div class="button-row">
                   <button class="chart-button" id="exportTopTen" type="button">Export top 10 JSON</button>
                 </div>
               </div>
             </div>
-
-            <div class="summary-rail" id="summaryRail"></div>
 
             <article class="table-panel">
               <div class="table-wrap">
@@ -185,12 +181,10 @@
                     <tr>
                       <th>Rank</th>
                       <th>Creator</th>
-                      <th>Industry</th>
                       <th>Atlas score</th>
                       <th>Projected</th>
                       <th>30D GMV</th>
-                      <th>Views</th>
-                      <th>Engagement</th>
+                      <th>Industry</th>
                     </tr>
                   </thead>
                   <tbody id="leaderboardBody"></tbody>
@@ -202,10 +196,9 @@
           <section class="section" id="advisor">
             <div class="section-header">
               <div>
-                <span class="section-kicker">Advisor</span>
-                <h2>Campaign walkthrough</h2>
+                <span class="section-kicker">Planner</span>
+                <h2>Simple plan helper</h2>
               </div>
-              <p class="section-caption">Three quick choices to turn the dashboard into a recommendation engine.</p>
             </div>
 
             <div class="advisor-grid">

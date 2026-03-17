@@ -7,6 +7,8 @@ import type { BrandProfile, Creator, RankedCreator } from './types';
 import { getVectorBackend, hasUsableDatabaseUrl, searchMemory, searchPostgres } from './vectorStore';
 
 const SEMANTIC_CANDIDATE_LIMIT = 50;
+const SEMANTIC_WEIGHT = 0.45;
+const PROJECTED_WEIGHT = 0.55;
 
 function clamp(value: number, min = 0, max = 1): number {
   return Math.min(max, Math.max(min, value));
@@ -19,15 +21,6 @@ function round(value: number, digits = 4): number {
 
 function normalizeProjectedScore(projectedScore: number): number {
   return clamp((projectedScore - 60) / 40);
-}
-
-function deriveAlpha(brandProfile: BrandProfile): number {
-  const gmvRatio = clamp(Math.log1p(Math.max(brandProfile.gmv, 1)) / Math.log1p(1_000_000));
-  const industryBreadthBoost = brandProfile.industries.length > 1 ? 0.05 : 0;
-  const audienceBreadthBoost =
-    brandProfile.target_audience.age_ranges.length > 2 ? 0.03 : 0;
-
-  return clamp(0.72 - 0.12 * gmvRatio + industryBreadthBoost + audienceBreadthBoost, 0.55, 0.8);
 }
 
 async function fetchSemanticCandidates(
@@ -85,7 +78,6 @@ export async function searchCreators(
   const semanticQuery = buildBrandSearchDocument(query, brandProfile);
   const queryEmbedding = await embedText(semanticQuery);
   const candidates = await fetchSemanticCandidates(queryEmbedding);
-  const alpha = deriveAlpha(brandProfile);
 
   return candidates
     .map(({ creator, semanticScore }) => {
@@ -99,7 +91,8 @@ export async function searchCreators(
       };
 
       const projectedScore = normalizeProjectedScore(creator.projected_score);
-      const finalScore = 100 * clamp(alpha * semanticScore + (1 - alpha) * projectedScore);
+      const finalScore =
+        100 * clamp(SEMANTIC_WEIGHT * semanticScore + PROJECTED_WEIGHT * projectedScore);
 
       rankedCreator.scores.final_score = round(finalScore, 2);
       return rankedCreator;

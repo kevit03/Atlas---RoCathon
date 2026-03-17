@@ -386,7 +386,7 @@ function buildPdfReportHtml(view) {
             position: relative;
             width: 34px;
             height: 34px;
-            background: linear-gradient(145deg, var(--accent) 0%, #0a3048 100%);
+            background: var(--accent);
           }
 
           .mark::before {
@@ -505,7 +505,7 @@ function buildPdfReportHtml(view) {
           }
 
           .recommendation-card {
-            background: linear-gradient(180deg, #fafdff 0%, #ffffff 100%);
+            background: #fbfdff;
           }
 
           .profile-tags {
@@ -636,7 +636,7 @@ function buildPdfReportHtml(view) {
               </div>
               <h1>${escapeHtml(view.profileDetail.label)} market brief</h1>
               <p class="lede">
-                ${escapeHtml(view.profileDetail.tagline)} Atlas screens the creator universe with a weighted model that prioritizes brand relevance before commercial scale, then returns a defendable top 10 for review.
+                ${escapeHtml(view.profileDetail.tagline)} Atlas screens the creator universe, ranks the best fits, and returns a clear top 10.
               </p>
             </div>
             <div class="meta-stack">
@@ -911,7 +911,6 @@ function renderControls(view) {
 
   typeSearch.value = state.searchTerm;
   document.getElementById("profileTagline").textContent = view.profileDetail.tagline;
-  document.getElementById("scenarioMode").textContent = view.mode;
 }
 
 function renderMeta(view) {
@@ -920,7 +919,7 @@ function renderMeta(view) {
   document.getElementById("universeCount").textContent = `${view.universe.all.length}`;
   document.getElementById("generatedAt").textContent = generatedAt;
   document.getElementById("analyticsCaption").textContent = state.searchTerm
-    ? `Filtered by "${state.searchTerm}" in ${view.profileDetail.label}.`
+    ? `Filtered by "${state.searchTerm}".`
     : view.profileDetail.tagline;
 }
 
@@ -940,7 +939,7 @@ function renderSelectedCreator(view) {
   target.innerHTML = `
     <strong class="selected-name">${creatorDisplayName(creator)}</strong>
     <span class="selected-handle">@${creator.username}</span>
-    <p class="detail-copy selected-bio">${truncateText(creator.bio, 156)}</p>
+    <p class="detail-copy selected-bio">${truncateText(creator.bio, 104)}</p>
     <p class="detail-copy" style="margin:0 0 12px;">Atlas Score ${creator.atlasScore.toFixed(2)}</p>
     <div class="industry-badges">
       ${creator.content_style_tags.map((tag) => `<span class="industry-badge">${tag}</span>`).join("")}
@@ -948,10 +947,10 @@ function renderSelectedCreator(view) {
   `;
 
   const items = [
-    { label: "Industry match (1/3 relevance)", value: creator.diagnostics.industryFit },
-    { label: "Query overlap (1/3 relevance)", value: creator.diagnostics.queryOverlap },
-    { label: "Audience fit (1/3 relevance)", value: creator.diagnostics.audienceFit },
-    { label: "Commercial quality (40% final)", value: creator.diagnostics.commercialIndex },
+    { label: "Industry", value: creator.diagnostics.industryFit },
+    { label: "Query", value: creator.diagnostics.queryOverlap },
+    { label: "Audience", value: creator.diagnostics.audienceFit },
+    { label: "Commercial", value: creator.diagnostics.commercialIndex },
   ];
 
   breakdown.innerHTML = items
@@ -977,22 +976,20 @@ function renderKpis(view) {
 
   const scores = view.universe.all.map((creator) => creator.atlasScore).sort((a, b) => b - a);
   const topCreator = view.universe.top[0];
-  const p90 = percentile(scores, 0.1);
   const totalTopTenGmv = view.universe.topTen.reduce((sum, creator) => sum + creator.metrics.total_gmv_30d, 0);
   const avgProjected = average(view.universe.all, (creator) => creator.projected_score);
-  const avgEngagement = average(view.universe.all, (creator) => creator.metrics.engagement_rate);
+  const avgAtlas = average(view.universe.topTen, (creator) => creator.atlasScore);
 
   const cards = [
     {
-      label: "Top candidate",
+      label: "Best match",
       value: topCreator ? creatorDisplayName(topCreator) : "None",
       valueClass: topCreator ? "kpi-name" : "",
-      copy: topCreator ? `@${topCreator.username} · ${topCreator.atlasScore.toFixed(2)} atlas score` : "No results",
+      copy: topCreator ? `@${topCreator.username}` : "No results",
     },
-    { label: "P90 threshold", value: p90.toFixed(2), copy: "Top-decile cutoff" },
-    { label: "Top 10 GMV", value: formatCurrency(totalTopTenGmv), copy: "Combined shortlist commerce" },
-    { label: "Avg projected", value: avgProjected.toFixed(2), copy: "Universe projected score" },
-    { label: "Avg engagement", value: formatPercent(avgEngagement), copy: "Universe engagement" },
+    { label: "Atlas average", value: avgAtlas.toFixed(2), copy: "Top 10 shortlist" },
+    { label: "Top 10 GMV", value: formatCurrency(totalTopTenGmv), copy: "Shortlist total" },
+    { label: "Projected", value: avgProjected.toFixed(2), copy: "Universe average" },
   ];
 
   cards.forEach((card) => {
@@ -1079,7 +1076,6 @@ function scoreDistributionMarkup(view, expanded = false) {
       <text class="chart-label" x="${margin.left}" y="${height - 6}">Highest ranked</text>
       <text class="chart-label" x="${width - margin.right - 68}" y="${height - 6}">Long tail</text>
     </svg>
-    <div class="chart-note">Detail ${state.chartDetail} · hover to enlarge, click to pin.</div>
   `;
 }
 
@@ -1143,7 +1139,6 @@ function scatterPlotMarkup(view, expanded = false) {
       ${circles}
       ${labels}
     </svg>
-    <div class="chart-note">Detail ${state.chartDetail} · hover to enlarge, click to pin.</div>
   `;
 }
 
@@ -1228,7 +1223,6 @@ function efficiencyPlotMarkup(view, expanded = false) {
       ${points}
       ${annotations}
     </svg>
-    <div class="chart-note">Detail ${state.chartDetail} · hover to enlarge, click to pin.</div>
   `;
 }
 
@@ -1275,7 +1269,6 @@ function audienceFitChartMarkup(view, expanded = false) {
     <svg class="chart-svg ${expanded ? "expanded" : ""}" viewBox="0 0 ${width} ${height}" style="height:${height}px" role="img" aria-label="Top audience fit">
       ${bars}
     </svg>
-    <div class="chart-note">Detail ${state.chartDetail} · hover to enlarge, click to pin.</div>
   `;
 }
 
@@ -1290,6 +1283,9 @@ function renderAudienceFitChart(view) {
 
 function renderSummaryRail(view) {
   const container = document.getElementById("summaryRail");
+  if (!container) {
+    return;
+  }
   container.innerHTML = "";
 
   const topGmv = [...view.universe.top].sort((a, b) => b.metrics.total_gmv_30d - a.metrics.total_gmv_30d)[0];
@@ -1336,18 +1332,15 @@ function renderLeaderboard(view) {
       <td class="rank-cell">
         <strong>${creatorDisplayName(creator)}</strong>
         <span class="creator-handle">@${creator.username}</span>
-        <span class="detail-copy">${truncateText(creator.bio, 118)}</span>
       </td>
+      <td>${creator.atlasScore.toFixed(2)}</td>
+      <td>${creator.projected_score.toFixed(2)}</td>
+      <td>${formatCurrency(creator.metrics.total_gmv_30d)}</td>
       <td>
         <div class="industry-badges">
           ${creator.content_style_tags.map((tag) => `<span class="industry-badge">${tag}</span>`).join("")}
         </div>
       </td>
-      <td>${creator.atlasScore.toFixed(2)}</td>
-      <td>${creator.projected_score.toFixed(2)}</td>
-      <td>${formatCurrency(creator.metrics.total_gmv_30d)}</td>
-      <td>${formatCompactNumber(creator.metrics.avg_views_30d)}</td>
-      <td>${formatPercent(creator.metrics.engagement_rate)}</td>
     `;
     row.addEventListener("click", () => {
       state.selectedCreatorUsername = creator.username;
@@ -1415,15 +1408,15 @@ function renderAdvisor(view) {
   if (!state.quizStarted) {
     quizMount.innerHTML = `
       <div class="panel-label">Walkthrough</div>
-      <h3>Would you like to take a quiz?</h3>
-      <p class="detail-copy">Answer three quick prompts to turn the current screen into a campaign plan.</p>
+      <h3>Need a simple plan?</h3>
+      <p class="detail-copy">Answer three quick prompts.</p>
       <button class="quiz-button primary" id="startQuizButton" type="button">Start</button>
     `;
 
     advisorOutput.innerHTML = `
       <div class="panel-label">Output</div>
-      <h3>Campaign recommendation</h3>
-      <p class="detail-copy">The recommendation set will appear here once the quiz is complete.</p>
+      <h3>Recommendation</h3>
+      <p class="detail-copy">Your shortlist will appear here.</p>
     `;
 
     document.getElementById("startQuizButton").addEventListener("click", () => {
@@ -1495,7 +1488,7 @@ function renderAdvisor(view) {
             (creator, index) => `
               <article class="advisor-pick">
                 <strong>${index + 1}. ${creatorDisplayName(creator)}</strong>
-                <div class="detail-copy">${truncateText(creator.bio, 132)}</div>
+                <div class="detail-copy">@${creator.username}</div>
               </article>
             `
           )
@@ -1506,7 +1499,7 @@ function renderAdvisor(view) {
     advisorOutput.innerHTML = `
       <div class="panel-label">Output</div>
       <h3>Waiting for inputs</h3>
-      <div class="detail-copy">Complete the quiz to generate a recommendation.</div>
+      <div class="detail-copy">Finish the quiz to see a recommendation.</div>
     `;
   }
 }
