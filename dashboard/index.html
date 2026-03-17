@@ -3,91 +3,195 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlas Brief | Creator Match Intelligence</title>
+    <title>Atlas Brief | Executive Creator Match Dashboard</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="page-shell">
-      <header class="hero reveal">
-        <div class="hero-copy">
+      <header class="topbar">
+        <div class="brand-lockup">
           <p class="eyebrow">Atlas Brief</p>
-          <h1>Creator Match Intelligence</h1>
-          <p class="hero-summary">
-            Executive presentation view for the RoC hybrid creator ranking engine.
-          </p>
+          <strong>Executive Creator Match Dashboard</strong>
         </div>
-        <div class="hero-meta">
-          <div class="meta-card">
-            <span class="meta-label">Brand Profile</span>
-            <strong id="brandProfile">Loading...</strong>
-          </div>
-          <div class="meta-card">
-            <span class="meta-label">Search Query</span>
-            <strong id="queryText">Loading...</strong>
-          </div>
-          <div class="meta-card">
-            <span class="meta-label">Generated</span>
-            <strong id="generatedAt">Loading...</strong>
-          </div>
-        </div>
+        <nav class="hotbar">
+          <a href="#overview">Overview</a>
+          <a href="#portfolio">Portfolio</a>
+          <a href="#analytics">Analytics</a>
+          <a href="#advisor">Advisor</a>
+          <a href="#methodology">Method</a>
+        </nav>
       </header>
 
       <main>
-        <section class="metric-grid reveal" id="metricGrid"></section>
-
-        <section class="executive-layout">
-          <article class="feature-card reveal" id="featuredCandidate"></article>
-          <aside class="method-card reveal">
-            <p class="eyebrow">Scoring Model</p>
-            <h2>Convex Fusion</h2>
-            <p class="method-copy">
-              Semantic relevance is fused with RoC&apos;s projected commercial score using a
-              brand-aware convex combination. This keeps the ranking explainable while
-              preserving score magnitude.
+        <section class="hero section reveal" id="overview">
+          <div class="hero-copy">
+            <p class="eyebrow">RoC Match Intelligence</p>
+            <h1>Shortlist the right creators, then explain the decision like an executive team would.</h1>
+            <p class="hero-summary">
+              Explore brand-profile scenarios, filter creator types, compare analytics, and
+              walk through a guided strategy quiz without exposing the technical scoring model
+              up front.
             </p>
-            <div class="formula-block">
-              <span>projected_normalized = (projected_score - 60) / 40</span>
-              <span>final_score = 100 * (alpha * semantic_score + (1 - alpha) * projected_normalized)</span>
+          </div>
+          <aside class="hero-side">
+            <div class="meta-card">
+              <span class="meta-label">Active Brand</span>
+              <strong id="activeBrandLabel">Loading...</strong>
             </div>
-            <div class="pill-row" id="methodPills"></div>
+            <div class="meta-card">
+              <span class="meta-label">Scenario Mode</span>
+              <strong id="scenarioMode">Loading...</strong>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Last Generated</span>
+              <strong id="generatedAt">Loading...</strong>
+            </div>
           </aside>
         </section>
 
-        <section class="insight-layout">
-          <article class="panel reveal">
-            <div class="panel-head">
-              <p class="eyebrow">Executive Readout</p>
-              <h2>What The Ranking Says</h2>
+        <section class="section reveal">
+          <article class="control-panel">
+            <div class="section-head compact">
+              <div>
+                <p class="eyebrow">Explorer</p>
+                <h2>Choose A Brand Profile</h2>
+              </div>
+              <span class="mode-pill" id="modeBadge">Loading...</span>
             </div>
-            <div class="insight-list" id="insightList"></div>
-          </article>
-
-          <article class="panel reveal">
-            <div class="panel-head">
-              <p class="eyebrow">Market Shape</p>
-              <h2>Top Signal Distribution</h2>
+            <div class="control-grid">
+              <label class="control-field">
+                <span>Brand profile</span>
+                <select id="profileSelect"></select>
+              </label>
+              <label class="control-field">
+                <span>Creator type or keyword</span>
+                <input id="typeSearch" type="text" placeholder="Try: iphone, decor, premium, studio..." />
+              </label>
+              <label class="control-field">
+                <span>Industry filter</span>
+                <select id="industrySelect"></select>
+              </label>
             </div>
-            <div class="distribution-list" id="distributionList"></div>
+            <div class="profile-card-grid" id="profileCardGrid"></div>
           </article>
         </section>
 
-        <section class="panel reveal">
-          <div class="panel-head">
-            <p class="eyebrow">Ranked Candidates</p>
-            <h2>Top 10 Recommendation Set</h2>
+        <section class="section reveal">
+          <div class="metric-grid" id="metricGrid"></div>
+        </section>
+
+        <section class="section reveal" id="portfolio">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Portfolio</p>
+              <h2>Recommended Creator Set</h2>
+            </div>
+            <p class="section-copy" id="portfolioSummary"></p>
           </div>
-          <div class="rank-list" id="rankList"></div>
+
+          <div class="portfolio-layout">
+            <article class="feature-card" id="featuredCandidate"></article>
+            <article class="panel">
+              <div class="panel-head">
+                <p class="eyebrow">Executive Readout</p>
+                <h3>What The Current Slate Signals</h3>
+              </div>
+              <div class="insight-list" id="insightList"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <p class="eyebrow">Candidates</p>
+              <h3>Ranked Recommendations</h3>
+            </div>
+            <div class="rank-list" id="rankList"></div>
+          </article>
+        </section>
+
+        <section class="section reveal" id="analytics">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Analytics</p>
+              <h2>Performance And Mix</h2>
+            </div>
+            <p class="section-copy">
+              Visual readouts for score spread, commercial scale, and category concentration.
+            </p>
+          </div>
+
+          <div class="chart-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <p class="eyebrow">Score Distribution</p>
+                <h3>Final Score Ladder</h3>
+              </div>
+              <div id="scoreChart" class="chart-frame"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <p class="eyebrow">Scale Mapping</p>
+                <h3>Reach Vs. GMV</h3>
+              </div>
+              <div id="scatterChart" class="chart-frame"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <p class="eyebrow">Category Mix</p>
+                <h3>Industry Concentration</h3>
+              </div>
+              <div class="distribution-list" id="distributionList"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section reveal" id="advisor">
+          <article class="advisor-shell">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Atlas Advisor</p>
+                <h2>Would You Like To Take A Quiz?</h2>
+              </div>
+              <p class="section-copy">
+                Answer three quick questions and get a campaign recommendation tailored to the
+                selected brand profile.
+              </p>
+            </div>
+
+            <div id="quizMount"></div>
+            <div id="advisorOutput"></div>
+          </article>
+        </section>
+
+        <section class="section reveal" id="methodology">
+          <article class="panel muted-panel">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Methodology</p>
+                <h2>Technical Notes And Requirement Check</h2>
+              </div>
+              <p class="section-copy">
+                The scoring formula and implementation details are intentionally placed at the
+                back so the main experience stays presentation-first.
+              </p>
+            </div>
+
+            <div class="checklist-grid" id="checklistGrid"></div>
+
+            <details class="formula-details">
+              <summary>Show scoring formula and runtime details</summary>
+              <div class="formula-block">
+                <span>projected_normalized = (projected_score - 60) / 40</span>
+                <span>final_score = 100 * (alpha * semantic_score + (1 - alpha) * projected_normalized)</span>
+              </div>
+              <div class="pill-row" id="methodPills"></div>
+            </details>
+          </article>
         </section>
       </main>
     </div>
-
-    <template id="metricTemplate">
-      <article class="metric-card">
-        <span class="metric-label"></span>
-        <strong class="metric-value"></strong>
-        <p class="metric-subtext"></p>
-      </article>
-    </template>
 
     <script src="/app.js" defer></script>
   </body>

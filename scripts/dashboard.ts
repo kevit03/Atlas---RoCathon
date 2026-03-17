@@ -2,6 +2,8 @@ import http from 'http';
 import fs from 'fs/promises';
 import path from 'path';
 
+import { brandProfileCatalog } from '../src/brandProfiles';
+
 const PORT = Number(process.env.PORT ?? 4173);
 const HOST = process.env.HOST ?? '127.0.0.1';
 const root = path.resolve(__dirname, '..');
@@ -32,6 +34,37 @@ function resolveRequestPath(urlPath: string): string {
 
 const server = http.createServer(async (request, response) => {
   const urlPath = request.url ?? '/';
+
+  if (urlPath === '/api/dashboard-data') {
+    try {
+      const [challengeOutputRaw, creatorsRaw] = await Promise.all([
+        fs.readFile(path.join(root, 'output', 'brand_smart_home_top10.json'), 'utf8'),
+        fs.readFile(path.join(root, 'creators.json'), 'utf8'),
+      ]);
+
+      response.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+      });
+      response.end(
+        JSON.stringify({
+          challengeOutput: JSON.parse(challengeOutputRaw),
+          creators: JSON.parse(creatorsRaw),
+          brandProfiles: brandProfileCatalog,
+        })
+      );
+      return;
+    } catch (error) {
+      response.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(
+        JSON.stringify({
+          error: 'Unable to build dashboard data payload.',
+        })
+      );
+      return;
+    }
+  }
+
   const filePath = resolveRequestPath(urlPath);
 
   if (!filePath.startsWith(root)) {
