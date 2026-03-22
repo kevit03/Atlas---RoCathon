@@ -35,6 +35,8 @@ const state = {
   selectedIndustry: "all",
   searchTerm: "",
   selectedCreatorUsername: null,
+  sortKey: "challengeScore",
+  sortDirection: "desc",
   showScoreHelp: false,
   quizStarted: false,
   quizStep: 0,
@@ -52,6 +54,45 @@ function clamp(value, min = 0, max = 1) {
 function round(value, digits = 2) {
   const precision = 10 ** digits;
   return Math.round(value * precision) / precision;
+}
+
+function compareValues(left, right, direction = "desc") {
+  if (left === right) {
+    return 0;
+  }
+
+  if (left == null) {
+    return 1;
+  }
+
+  if (right == null) {
+    return -1;
+  }
+
+  const leftValue = typeof left === "string" ? left.toLowerCase() : left;
+  const rightValue = typeof right === "string" ? right.toLowerCase() : right;
+
+  if (leftValue < rightValue) {
+    return direction === "asc" ? -1 : 1;
+  }
+
+  return direction === "asc" ? 1 : -1;
+}
+
+function leaderboardSortValue(creator, sortKey) {
+  switch (sortKey) {
+    case "creator":
+      return creatorDisplayName(creator);
+    case "projected":
+      return creator.projected_score;
+    case "gmv":
+      return creator.metrics.total_gmv_30d;
+    case "industry":
+      return creator.content_style_tags.join(", ");
+    case "challengeScore":
+    default:
+      return creator.challengeScore;
+  }
 }
 
 function tokenize(text) {
@@ -828,17 +869,21 @@ function buildUniverse(profileDetail) {
         0.15 * normalizeLog(creator.metrics.total_gmv_30d, maxGmv);
       const relevanceScore = (industry + queryOverlap + audience) / 3;
       const semanticProxy = relevanceScore;
+      const challengeScore =
+        100 * clamp(0.45 * semanticProxy + 0.55 * normalizeProjected(creator.projected_score));
       const atlasScore =
         100 * clamp(0.6 * relevanceScore + 0.4 * commercialIndex);
 
       return {
         ...creator,
+        challengeScore: round(challengeScore, 2),
         atlasScore: round(atlasScore, 2),
         diagnostics: {
           industryFit: round(industry, 4),
           queryOverlap: round(queryOverlap, 4),
           audienceFit: round(audience, 4),
           relevanceScore: round(relevanceScore, 4),
+          challengeScore: round(challengeScore, 2),
           commercialIndex: round(commercialIndex, 4),
           semanticProxy: round(semanticProxy, 4),
           gmvNorm: round(normalizeLog(creator.metrics.total_gmv_30d, maxGmv), 4),
@@ -854,7 +899,7 @@ function buildUniverse(profileDetail) {
       }
       return creator.diagnostics.queryOverlap > 0;
     })
-    .sort((left, right) => right.atlasScore - left.atlasScore);
+    .sort((left, right) => right.challengeScore - left.challengeScore);
 
   if (!state.selectedCreatorUsername || !scored.some((item) => item.username === state.selectedCreatorUsername)) {
     state.selectedCreatorUsername = scored[0]?.username ?? null;
@@ -891,23 +936,40 @@ function getIndustries() {
 }
 
 function renderControls(view) {
-  const profileSelect = document.getElementById("profileSelect");
-  const industrySelect = document.getElementById("industrySelect");
+  const profileChips = document.getElementById("profileChips");
+  const industryChips = document.getElementById("industryChips");
   const typeSearch = document.getElementById("typeSearch");
 
-  profileSelect.innerHTML = dashboardData.brandProfiles
+  profileChips.innerHTML = dashboardData.brandProfiles
     .map(
       (profile) =>
-        `<option value="${profile.id}" ${profile.id === state.selectedProfileId ? "selected" : ""}>${profile.label}</option>`
+        `<button class="filter-chip ${profile.id === state.selectedProfileId ? "is-selected" : ""}" data-profile-id="${profile.id}" type="button">${profile.label}</button>`
     )
     .join("");
 
-  industrySelect.innerHTML = getIndustries()
+  industryChips.innerHTML = getIndustries()
     .map((industry) => {
       const label = industry === "all" ? "All industries" : industry;
-      return `<option value="${industry}" ${industry === state.selectedIndustry ? "selected" : ""}>${label}</option>`;
+      return `<button class="filter-chip ${industry === state.selectedIndustry ? "is-selected" : ""}" data-industry="${industry}" type="button">${label}</button>`;
     })
     .join("");
+
+  document.querySelectorAll("[data-profile-id]").forEach((button) => {
+    button.onclick = () => {
+      state.selectedProfileId = button.dataset.profileId;
+      state.quizStarted = false;
+      state.quizStep = 0;
+      state.quizAnswers = {};
+      render();
+    };
+  });
+
+  document.querySelectorAll("[data-industry]").forEach((button) => {
+    button.onclick = () => {
+      state.selectedIndustry = button.dataset.industry;
+      render();
+    };
+  });
 
   typeSearch.value = state.searchTerm;
   document.getElementById("profileTagline").textContent = view.profileDetail.tagline;
@@ -940,7 +1002,10 @@ function renderSelectedCreator(view) {
     <strong class="selected-name">${creatorDisplayName(creator)}</strong>
     <span class="selected-handle">@${creator.username}</span>
     <p class="detail-copy selected-bio">${truncateText(creator.bio, 104)}</p>
-    <p class="detail-copy" style="margin:0 0 12px;">Atlas Score ${creator.atlasScore.toFixed(2)}</p>
+    <div class="score-stack">
+      <p class="detail-copy" style="margin:0;">Challenge Score ${creator.challengeScore.toFixed(2)}</p>
+      <p class="detail-copy" style="margin:4px 0 12px;">Atlas Score ${creator.atlasScore.toFixed(2)}</p>
+    </div>
     <div class="industry-badges">
       ${creator.content_style_tags.map((tag) => `<span class="industry-badge">${tag}</span>`).join("")}
     </div>
@@ -979,17 +1044,20 @@ function renderKpis(view) {
   const totalTopTenGmv = view.universe.topTen.reduce((sum, creator) => sum + creator.metrics.total_gmv_30d, 0);
   const avgProjected = average(view.universe.all, (creator) => creator.projected_score);
   const avgAtlas = average(view.universe.topTen, (creator) => creator.atlasScore);
+  const avgChallenge = average(view.universe.topTen, (creator) => creator.challengeScore);
 
   const cards = [
     {
       label: "Best match",
       value: topCreator ? creatorDisplayName(topCreator) : "None",
       valueClass: topCreator ? "kpi-name" : "",
-      copy: topCreator ? `@${topCreator.username}` : "No results",
+      copy: topCreator
+        ? `@${topCreator.username} · ${topCreator.challengeScore.toFixed(2)} challenge score`
+        : "No results",
     },
-    { label: "Atlas average", value: avgAtlas.toFixed(2), copy: "Top 10 shortlist" },
+    { label: "Challenge average", value: avgChallenge.toFixed(2), copy: "Top 10 shortlist" },
     { label: "Top 10 GMV", value: formatCurrency(totalTopTenGmv), copy: "Shortlist total" },
-    { label: "Projected", value: avgProjected.toFixed(2), copy: "Universe average" },
+    { label: "Atlas average", value: avgAtlas.toFixed(2), copy: "Screening view" },
   ];
 
   cards.forEach((card) => {
@@ -1005,7 +1073,7 @@ function renderKpis(view) {
 }
 
 function scoreDistributionMarkup(view, expanded = false) {
-  const values = view.universe.all.map((creator) => creator.atlasScore);
+  const values = view.universe.all.map((creator) => creator.challengeScore);
 
   if (values.length === 0) {
     return "<p class='detail-copy'>No data available.</p>";
@@ -1049,7 +1117,7 @@ function scoreDistributionMarkup(view, expanded = false) {
   ];
 
   return `
-    <svg class="chart-svg ${expanded ? "expanded" : ""}" viewBox="0 0 ${width} ${height}" style="height:${height}px" role="img" aria-label="Universe score curve">
+    <svg class="chart-svg ${expanded ? "expanded" : ""}" viewBox="0 0 ${width} ${height}" style="height:${height}px" role="img" aria-label="Challenge score curve">
       <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d6dce6"></line>
       ${ticks
@@ -1324,7 +1392,15 @@ function renderLeaderboard(view) {
   const tbody = document.getElementById("leaderboardBody");
   tbody.innerHTML = "";
 
-  view.universe.top.forEach((creator, index) => {
+  const sortedCreators = [...view.universe.top].sort((left, right) =>
+    compareValues(
+      leaderboardSortValue(left, state.sortKey),
+      leaderboardSortValue(right, state.sortKey),
+      state.sortDirection
+    )
+  );
+
+  sortedCreators.forEach((creator, index) => {
     const row = document.createElement("tr");
     row.className = creator.username === state.selectedCreatorUsername ? "active" : "";
     row.innerHTML = `
@@ -1333,7 +1409,7 @@ function renderLeaderboard(view) {
         <strong>${creatorDisplayName(creator)}</strong>
         <span class="creator-handle">@${creator.username}</span>
       </td>
-      <td>${creator.atlasScore.toFixed(2)}</td>
+      <td>${creator.challengeScore.toFixed(2)}</td>
       <td>${creator.projected_score.toFixed(2)}</td>
       <td>${formatCurrency(creator.metrics.total_gmv_30d)}</td>
       <td>
@@ -1347,6 +1423,28 @@ function renderLeaderboard(view) {
       render();
     });
     tbody.appendChild(row);
+  });
+
+  document.querySelectorAll("[data-sort-key]").forEach((header) => {
+    const isActive = header.dataset.sortKey === state.sortKey;
+    header.dataset.sortDirection = isActive ? state.sortDirection : "";
+    header.classList.toggle("is-active", isActive);
+
+    header.onclick = () => {
+      const nextKey = header.dataset.sortKey;
+      if (!nextKey) {
+        return;
+      }
+
+      if (state.sortKey === nextKey) {
+        state.sortDirection = state.sortDirection === "desc" ? "asc" : "desc";
+      } else {
+        state.sortKey = nextKey;
+        state.sortDirection = nextKey === "creator" || nextKey === "industry" ? "asc" : "desc";
+      }
+
+      render();
+    };
   });
 }
 
@@ -1520,7 +1618,7 @@ function renderChartModal(view) {
 
   if (state.expandedChart === "curve") {
     label.textContent = "Expanded view";
-    title.textContent = "Universe curve";
+    title.textContent = "Challenge score curve";
     body.innerHTML = scoreDistributionMarkup(view, true);
     return;
   }
@@ -1545,19 +1643,6 @@ function renderChartModal(view) {
 }
 
 function attachEvents() {
-  document.getElementById("profileSelect").addEventListener("change", (event) => {
-    state.selectedProfileId = event.target.value;
-    state.quizStarted = false;
-    state.quizStep = 0;
-    state.quizAnswers = {};
-    render();
-  });
-
-  document.getElementById("industrySelect").addEventListener("change", (event) => {
-    state.selectedIndustry = event.target.value;
-    render();
-  });
-
   document.getElementById("typeSearch").addEventListener("input", (event) => {
     state.searchTerm = event.target.value;
     render();

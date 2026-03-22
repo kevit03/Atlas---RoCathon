@@ -12,6 +12,11 @@ function renderCards(targetId, items) {
       <strong>${item.title}</strong>
       <p class="detail-copy">${item.copy}</p>
       ${
+        item.href
+          ? `<a class="reference-link" href="${item.href}" target="_blank" rel="noreferrer">Open source</a>`
+          : ""
+      }
+      ${
         item.details
           ? `<details class="expand-detail">
               <summary>Longer explanation</summary>
@@ -31,19 +36,19 @@ function renderHeroMetrics(data) {
     <div class="hero-metric-list">
       <div class="hero-metric">
         <strong>${data.creators.length}</strong>
-        <span class="detail-copy">Creators screened across the full market universe.</span>
+        <span class="detail-copy">Creators screened.</span>
       </div>
       <div class="hero-metric">
-        <strong>4</strong>
-        <span class="detail-copy">Primary Atlas components: fit, query, audience, and commercial quality.</span>
+        <strong>50</strong>
+        <span class="detail-copy">Semantic candidates returned before reranking.</span>
       </div>
       <div class="hero-metric">
-        <strong>2</strong>
-        <span class="detail-copy">Referenced retrieval papers supporting the fusion approach.</span>
+        <strong>0.45 / 0.55</strong>
+        <span class="detail-copy">Official hybrid weights.</span>
       </div>
       <div class="hero-metric">
-        <strong>1</strong>
-        <span class="detail-copy">Official challenge ranker preserved separately from the dashboard screen.</span>
+        <strong>3</strong>
+        <span class="detail-copy">Primary research links.</span>
       </div>
     </div>
   `;
@@ -64,6 +69,7 @@ async function init() {
         status: "Official",
         title: "Convex fusion",
         copy: "The official ranker blends normalized semantic fit with normalized projected value.",
+        href: "https://arxiv.org/abs/2210.11934",
         details:
           "This keeps both components on the same scale while preserving score magnitude. Because projected_score already contains business signal, a linear blend is more useful here than a rank-only fusion rule.",
       },
@@ -95,6 +101,7 @@ async function init() {
         status: "Paper",
         title: "Bruch et al. (2022)",
         copy: "Supports convex combination for hybrid retrieval when scores are normalized.",
+        href: "https://arxiv.org/abs/2210.11934",
         details:
           "The paper 'An Analysis of Fusion Functions for Hybrid Retrieval' motivates the family of score fusion methods used by the official challenge ranker.",
       },
@@ -102,15 +109,17 @@ async function init() {
         status: "Paper",
         title: "Cormack et al. (2009)",
         copy: "Defines Reciprocal Rank Fusion, the classic rank-only baseline.",
+        href: "https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf",
         details:
           "Atlas references RRF as the comparison point, but does not use it in the final challenge ranker because rank-only fusion would throw away the magnitude of projected_score.",
       },
       {
-        status: "Design",
-        title: "Scaled heavy-tail metrics",
-        copy: "Large creator metrics are normalized before entering the score.",
+        status: "System",
+        title: "pgvector",
+        copy: "The vector layer uses cosine-distance search in Postgres.",
+        href: "https://github.com/pgvector/pgvector",
         details:
-          "Follower count, GMV, and views are all heavy-tailed. Log scaling stops a few very large creators from flattening the rest of the market and makes the screen more stable for review.",
+          "The official submission path stores creator embeddings in Postgres with pgvector, then retrieves nearest neighbors by cosine distance before applying the hybrid reranker.",
       },
     ]);
 

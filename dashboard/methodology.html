@@ -6,7 +6,7 @@
     <title>Atlas Brief | Atlas Method</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body class="method-page">
     <div class="app-shell">
       <header class="topbar">
         <a class="brand-home brand-lockup" href="/">
@@ -19,18 +19,18 @@
         <nav class="topnav">
           <a href="/">Home</a>
           <a href="/demo.html">Demo</a>
-          <a href="#scoring">Score</a>
-          <a href="#weights">Model choice</a>
-          <a href="#references">Research</a>
+          <a href="#scoring">Formulas</a>
+          <a href="#weights">Logic</a>
+          <a href="#references">Papers</a>
         </nav>
       </header>
 
       <main>
         <section class="section hero methodology-hero">
           <div class="hero-copy">
-            <span class="section-kicker">Atlas Method</span>
+            <span class="section-kicker">Research notes</span>
             <h1>Method</h1>
-            <p class="hero-text">A short explanation of the score and the research behind it.</p>
+            <p class="hero-text">The shortest path from vector retrieval to final rank.</p>
           </div>
           <aside class="hero-card" id="heroMetrics"></aside>
         </section>
@@ -45,7 +45,38 @@
 
           <div class="formula-grid">
             <article class="panel">
-              <span class="panel-label">Challenge engine</span>
+              <span class="panel-label">01 Semantic retrieval</span>
+              <h3>Similarity score</h3>
+              <pre class="formula-panel">semantic_score =
+  max(0, 1 - cosine_distance(query_embedding, creator_embedding))</pre>
+              <p class="detail-copy formula-note">Vector search returns the nearest creators by semantic similarity.</p>
+              <details class="expand-detail">
+                <summary>Longer explanation</summary>
+                <p class="detail-copy">
+                  Atlas embeds the query and creator documents, then uses cosine-distance nearest
+                  neighbor search in pgvector. The score is converted into a bounded similarity
+                  value for reranking.
+                </p>
+              </details>
+            </article>
+
+            <article class="panel">
+              <span class="panel-label">02 Projected score</span>
+              <h3>Business normalization</h3>
+              <pre class="formula-panel">projected_normalized =
+  (projected_score - 60) / 40</pre>
+              <p class="detail-copy formula-note">RoC already provides a bounded commercial signal from 60 to 100.</p>
+              <details class="expand-detail">
+                <summary>Longer explanation</summary>
+                <p class="detail-copy">
+                  The projected score is min-max normalized into the same 0 to 1 space as the
+                  semantic score so the hybrid blend remains interpretable.
+                </p>
+              </details>
+            </article>
+
+            <article class="panel">
+              <span class="panel-label">03 Hybrid reranking</span>
               <h3>Official ranker</h3>
               <pre class="formula-panel">projected_normalized = (projected_score - 60) / 40
 
@@ -54,7 +85,7 @@ final_score =
   0.45 * semantic_score +
   0.55 * projected_normalized
 )</pre>
-              <p class="detail-copy formula-note">This is the official challenge formula: normalized semantics plus normalized projected value, using the recommended 0.45 / 0.55 starting blend.</p>
+              <p class="detail-copy formula-note">This is the official challenge formula and the score that should be treated as primary.</p>
               <details class="expand-detail">
                 <summary>Longer explanation</summary>
                 <p class="detail-copy">
@@ -66,7 +97,7 @@ final_score =
             </article>
 
             <article class="panel">
-              <span class="panel-label">Dashboard screening</span>
+              <span class="panel-label">Appendix</span>
               <h3>Atlas screen</h3>
               <pre class="formula-panel">commercial_index = 0.65 * projected_normalized
                  + 0.20 * engagement_norm
@@ -90,30 +121,6 @@ atlas_score =
                   fit equally. That relevance block is then blended 60/40 against commercial
                   quality so fit still leads the screen without introducing arbitrary fine-grained
                   coefficients.
-                </p>
-              </details>
-            </article>
-
-            <article class="panel">
-              <span class="panel-label">Quiz advisor</span>
-              <h3>Advisor overlay</h3>
-              <pre class="formula-panel">advisor_score =
-  atlas_score
-  + objective_bias
-  + persona_bias
-  + posture_bias
-
-objective_bias favors:
-- GMV for sales
-- semantic fit for loyalty
-- reach and views for awareness</pre>
-              <p class="detail-copy formula-note">The advisor adds a light campaign bias on top of the base score.</p>
-              <details class="expand-detail">
-                <summary>Longer explanation</summary>
-                <p class="detail-copy">
-                  The quiz is not a second ranking system. It lightly tilts the shortlist based on
-                  campaign objective, voice, and rollout posture so the output feels closer to a
-                  planning recommendation than a static leaderboard.
                 </p>
               </details>
             </article>

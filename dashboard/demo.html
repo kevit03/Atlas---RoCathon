@@ -38,29 +38,29 @@
               <span class="rail-label">Filters</span>
             </div>
             <label class="field">
-              <span>Brand profile</span>
-              <select id="profileSelect"></select>
-            </label>
-            <label class="field">
               <span>Search</span>
               <input id="typeSearch" type="text" placeholder="iphone, decor, premium..." />
             </label>
-            <label class="field">
+            <div class="field">
+              <span>Brand profile</span>
+              <div class="chip-group" id="profileChips"></div>
+            </div>
+            <div class="field">
               <span>Industry</span>
-              <select id="industrySelect"></select>
-            </label>
+              <div class="chip-group" id="industryChips"></div>
+            </div>
           </section>
 
           <section class="rail-card inspector-card">
             <div class="rail-section-head">
-              <span class="rail-label">Atlas score</span>
-              <button class="text-button" id="toggleScoreHelp" type="button">Why this model</button>
+              <span class="rail-label">Challenge score</span>
+              <button class="text-button" id="toggleScoreHelp" type="button">Atlas details</button>
             </div>
             <div id="selectedCreatorSummary"></div>
             <div class="score-breakdown" id="scoreBreakdown"></div>
             <div class="score-help" id="scoreHelp" hidden>
-              <p><strong>Atlas Score</strong> blends fit and business quality.</p>
-              <p>60% relevance. 40% commercial quality.</p>
+              <p><strong>Atlas is the secondary screen.</strong> It helps explain fit, audience, and commercial quality after the official challenge score has already ranked the shortlist.</p>
+              <p>Use the methodology page for the official formula first.</p>
               <a href="/methodology.html">View method and evidence</a>
             </div>
           </section>
@@ -98,8 +98,8 @@
               <article class="panel chart-panel" data-expand-chart="curve">
                 <div class="panel-header panel-header-split">
                   <div>
-                    <span class="panel-label">Score distribution</span>
-                    <h3>Universe curve</h3>
+                    <span class="panel-label">Challenge score</span>
+                    <h3>Rank curve</h3>
                   </div>
                   <div class="chart-actions">
                     <label class="chart-control">
@@ -180,11 +180,11 @@
                   <thead>
                     <tr>
                       <th>Rank</th>
-                      <th>Creator</th>
-                      <th>Atlas score</th>
-                      <th>Projected</th>
-                      <th>30D GMV</th>
-                      <th>Industry</th>
+                      <th data-sort-key="creator">Creator</th>
+                      <th data-sort-key="challengeScore">Challenge score</th>
+                      <th data-sort-key="projected">Projected</th>
+                      <th data-sort-key="gmv">30D GMV</th>
+                      <th data-sort-key="industry">Industry</th>
                     </tr>
                   </thead>
                   <tbody id="leaderboardBody"></tbody>

@@ -69,54 +69,52 @@
 
         <section class="landing-section" id="impact">
           <div class="landing-section-head reveal">
-            <span class="section-kicker">Impact</span>
-            <h2>Why Atlas exists before the dashboard ever opens.</h2>
+            <span class="section-kicker">Submission flow</span>
+            <h2>The hackathon logic in three steps.</h2>
             <p class="landing-subcopy impact-subcopy">
-              Most teams can find creator names. The harder problem is defending why one creator
-              should get budget while another should not. Atlas makes that tradeoff explicit.
+              Atlas is built around the actual judging flow: retrieve strong matches, combine them
+              with business quality, and return a shortlist that is easy to defend.
             </p>
           </div>
 
-          <div class="impact-grid">
+          <div class="impact-grid agenda-grid">
             <article class="impact-card reveal delay-1">
-              <span class="panel-label">The problem</span>
-              <h3>Big numbers can still be the wrong fit.</h3>
-              <p class="detail-copy">Reach is useful, but it does not guarantee the right audience or category match.</p>
+              <span class="panel-label">01 Retrieval</span>
+              <h3>Embed query</h3>
+              <p class="detail-copy">Vector search runs on creator bio and content tags.</p>
             </article>
 
             <article class="impact-card reveal delay-2">
-              <span class="panel-label">The shift</span>
-              <h3>Atlas checks fit before scale.</h3>
-              <p class="detail-copy">The ranking rewards relevance first and business quality second.</p>
+              <span class="panel-label">02 Projected score</span>
+              <h3>Use RoC business signal</h3>
+              <p class="detail-copy">Projected score stays in the ranker as the commercial layer.</p>
             </article>
 
             <article class="impact-card reveal delay-3">
-              <span class="panel-label">The outcome</span>
-              <h3>The shortlist is easier to explain.</h3>
-              <p class="detail-copy">You get a recommendation, a reason, and a report you can share.</p>
+              <span class="panel-label">03 Hybrid reranking</span>
+              <h3>Blend semantic and projected</h3>
+              <p class="detail-copy">Good fit plus strong GMV should beat perfect fit with weak commerce.</p>
             </article>
           </div>
 
-          <div class="narrative-strip reveal">
+          <div class="narrative-strip reveal submission-strip">
             <div class="narrative-copy">
-              <span class="panel-label">Story</span>
-              <h3>Built for the moment before budget is assigned.</h3>
-              <p class="detail-copy">
-                Atlas turns messy creator research into a small set of names you can trust.
-              </p>
+              <span class="panel-label">Submission items</span>
+              <h3>Everything the repo needs to hand over.</h3>
+              <p class="detail-copy">Search API, ingest path, vector DB, JSON output, and a clear README.</p>
             </div>
             <div class="narrative-metrics">
               <article>
                 <strong data-count="10">10</strong>
-                <span>submission-ready results</span>
+                <span>top results exported</span>
               </article>
               <article>
                 <strong data-count="4">4</strong>
-                <span>score components inspected live</span>
+                <span>core deliverables covered</span>
               </article>
               <article>
                 <strong data-count="1">1</strong>
-                <span>clear recommendation path</span>
+                <span>official query profile</span>
               </article>
             </div>
           </div>
